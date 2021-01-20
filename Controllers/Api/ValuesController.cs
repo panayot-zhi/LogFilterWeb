@@ -7,9 +7,14 @@ using System.Threading.Tasks;
 
 namespace LogFilterWeb.Controllers.Api
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class Values : ControllerBase
+    public class ValuesController : ControllerBase
     {
+        [HttpGet]
+        [Route("api/values/ping")]
+        public string Ping(string ping)
+        {
+            return $"{DateTime.Now}: " + ping;
+        }
     }
 }
