@@ -1,4 +1,6 @@
-﻿@{
+﻿@model SmartUCF
+
+@{
     ViewData["Title"] = "SmartUcf";
 }
 
@@ -10,7 +12,7 @@
     <li class="active">
         <a href="@Url.Action("Index", "Home")">
             <i class="now-ui-icons arrows-1_minimal-left"></i>
-            <p>Home</p>
+            <p>SmartUCF</p>
         </a>
     </li>
     
@@ -74,7 +76,7 @@
 <div class="panel-header">
     <div class="header text-center">
         <h2 class="title">SmartUCF</h2>
-        <p class="category">Use this place here to construct a dashboard from all the available dashboards for the system.</p>
+        <p class="category">Current number of stopwatch files extracted: @Model.StopwatchFiles.Count().</p>
     </div>
 </div>
 

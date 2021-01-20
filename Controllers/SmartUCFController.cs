@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LogFilterWeb.Models.View;
+using LogFilterWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogFilterWeb.Controllers
@@ -10,7 +12,12 @@ namespace LogFilterWeb.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            var vModel = new SmartUCF()
+            {
+                StopwatchFiles = SmartUCFService.GetOverallStopwatchData(DateTime.Now.AddDays(-7), DateTime.Now)
+            };
+
+            return View(vModel);
         }
     }
 }

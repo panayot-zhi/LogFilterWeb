@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using LogFilterWeb.Models.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 
@@ -13,59 +14,60 @@ namespace LogFilterWeb.Utility
 {
     public static class FilesHelper
     {
-        public static bool ThrowIfFileNameNotDate = true;
-        public static bool UseFileContentsCaching = true;
+        public static bool ThrowIfNotDate = true;
+        public static bool UseCache = true;
 
         private static readonly MemoryCache Cache = new MemoryCache(new MemoryCacheOptions()
         {
             ExpirationScanFrequency = TimeSpan.FromHours(1)
         });
 
-        private static string Hash(string input)
+        public static IEnumerable<FileInfo> GetFilesFromDirectory(DirectoryInfo directoryInfo, string searchPattern)
         {
-            using (var md5Hash = MD5.Create())
+            return directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
+                .OrderByDescending(x => x.FullName); // always order by descending FullName
+        }
+
+        public static StopwatchFile ReadStopWatchFile(FileInfo fileInfo)
+        {
+            var fullFileName = fileInfo.FullName;
+            var directoryName = fileInfo.Directory.Name;
+
+            return new StopwatchFile()
             {
-                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-                StringBuilder sBuilder = new StringBuilder();
-                for (int i = 0; i < data.Length; i++)
+                FullName = fullFileName,
+                Date = ToDateTime(directoryName).Value,
+                ServerName = Constants.GetSmartUCFMachineName(fullFileName,out _),
+                Records = ReadStopWatchRecords(fullFileName).ToList()   // TODO: Remove ToList
+            };
+        }
+
+        public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
+        {
+            return File.ReadLines(filePath)
+                .Select(line => line.Split(','))
+                .Select(columns => new StopwatchRecord()
                 {
-                    sBuilder.Append(data[i].ToString("x2"));
-                }
-                return sBuilder.ToString();
-            }
+                    Date = ToDateTime(columns[0]).Value,
+
+                    User = columns[1],
+                    ListName = columns[2],
+                    NumberOfRows = int.Parse(columns[3]),
+                    RetrieveMilliseconds = int.Parse(columns[4])
+
+                });
         }
 
-        public static T ReadJson<T>(string filePath)
+        public static DateTime? ToDateTime(string target)
         {
-            var key = Hash(filePath);
-
-            // check cache for entry
-            var cacheEntry = Cache.Get<T>(key);
-            if (cacheEntry != null && UseFileContentsCaching)
+            var supportedFormats = new[]
             {
-                // if we're allowed to use the cache,
-                // and there is an entry retrieved
-                return cacheEntry;
-            }
+                Constants.DateFormat, 
+                Constants.DateTimeFormat
+            };
 
-            // else retrieve the data again
-            var result = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
-
-            // refresh the record data in cache
-            Cache.Set(key, result, TimeSpan.FromHours(1));
-
-            return result;
-        }
-
-        public static string GetMinProcessTimestamp(string a, string b)
-        {
-            return Nullable.Compare(ToDateTime(a), ToDateTime(b)) < 0 ? a : b;
-        }
-
-        public static DateTime? ToDateTime(string timestamp)
-        {
-            if (DateTime.TryParseExact(timestamp,
-                format: Constants.TimestampFormat,
+            if (DateTime.TryParseExact(target,
+                formats: supportedFormats,
                 provider: CultureInfo.InvariantCulture,
                 style: DateTimeStyles.None,
                 out var result))
@@ -73,51 +75,12 @@ namespace LogFilterWeb.Utility
                 return result;
             }
 
-            return null;
-
-        }
-
-        public static DateTime? GetFileNameAsDate(string fileName)
-        {
-            const string fileDateFormat = Constants.FileDateFormat;
-            if (DateTime.TryParseExact(fileName, fileDateFormat, CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out var result))
+            if (ThrowIfNotDate)
             {
-                return result;
-            }
-
-            if (ThrowIfFileNameNotDate)
-            {
-                throw new ArgumentException($"The specified argument '{fileName}' is not a date in the format '{fileDateFormat}'.");
+                throw new ArgumentException($"The specified argument '{target}' is not a date in the supported formats: '{string.Join(", ", supportedFormats)}'.");
             }
 
             return null;
-        }
-
-        public static long GetFileSize(string filePath)
-        {
-            return new FileInfo(filePath).Length;
-        }
-
-        public static string GetFileName(string filePath)
-        {
-            var fileInfo = new FileInfo(filePath);
-            return fileInfo.Name.Replace(fileInfo.Extension, string.Empty);
-        }
-
-        public static string GetFileNameAndExtension(string filePath)
-        {
-            return new FileInfo(filePath).Name;
-        }
-
-        public static string GetParentDirectoryName(string filePath)
-        {
-            return new FileInfo(filePath).Directory?.Name;
-        }
-
-        public static string GetDirectoryName(string filePath)
-        {
-            return new DirectoryInfo(filePath).Name;
         }
     }
 }
