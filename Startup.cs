@@ -31,18 +31,20 @@ namespace LogFilterWeb
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "LogFilterWeb", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "LogFilterWebApi", Version = "v1" });
             });
 
-            services.AddControllersWithViews(options =>
-            {
+            services.AddControllersWithViews(options => 
+
                 options.CacheProfiles.Add("NoCache", new CacheProfile()
                 {
                     Duration = 0,
                     Location = ResponseCacheLocation.None,
                     NoStore = true
-                });
-            });
+                })
+
+            ).AddRazorRuntimeCompilation();
+
         }
 
         /// <summary>

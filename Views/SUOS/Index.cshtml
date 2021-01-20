@@ -9,29 +9,15 @@
 @section sidebar {
     <li class="active">
         <a href="@Url.Action("Index", "Home")">
-            <i class="now-ui-icons shopping_shop"></i>
+            <i class="now-ui-icons arrows-1_minimal-left"></i>
             <p>Home</p>
-        </a>
-    </li>
-
-    <li>
-        <a href="@Url.Action("Index", "SUOS")">
-            <i class="now-ui-icons business_chart-pie-36"></i>
-            <p>SUOS</p>
-        </a>
-    </li>
-
-    <li>
-        <a href="@Url.Action("Index", "SmartUCF")">
-            <i class="now-ui-icons business_chart-pie-36"></i>
-            <p>SmartUCF</p>
         </a>
     </li>
     
     <li class="active-pro">
-        <a href="~/html/dashboard.html">
-            <i class="now-ui-icons design-2_html5"></i>
-            <p>Theme Showcase</p>
+        <a href="~/swagger" target="_blank">
+            <i class="now-ui-icons files_paper"></i>
+            <p>Swagger</p>
         </a>
     </li>
 }
@@ -54,7 +40,7 @@
         <span class="navbar-toggler-bar navbar-kebab"></span>
         <span class="navbar-toggler-bar navbar-kebab"></span>
     </button>
-    
+
     <div class="collapse navbar-collapse justify-content-end" id="navigation">
         <ul class="navbar-nav">
 
@@ -87,8 +73,8 @@
 
 <div class="panel-header">
     <div class="header text-center">
-        <h2 class="title">HOME</h2>
-        <p class="category">Use this place here to construct a dashboard from all the favorite chosen elements from the user.</p>
+        <h2 class="title">SUOS</h2>
+        <p class="category">Use this place here to construct a dashboard from all the available dashboards for the system.</p>
     </div>
 </div>
 
@@ -97,5 +83,5 @@
 }
 
 @section scripts {
-
+    @* no-op *@
 }
