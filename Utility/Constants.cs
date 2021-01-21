@@ -94,32 +94,32 @@ namespace LogFilterWeb.Utility
 
 
         /// <summary>
-        /// X:\\Processed\\SmartUcf\\
+        /// X:\\Processed\\SmartUCF\\
         /// </summary>
-        public const string SmartUcfRoot = "X:\\Processed\\SmartUCF\\";
+        public const string SmartUCFRoot = "X:\\Processed\\SmartUCF\\";
 
         /// <summary>
-        /// X:\\Logs\\SmartUcf\\
+        /// X:\\Logs\\SmartUCF\\
         /// </summary>
-        public const string SmartUcfLogsRoot = "X:\\Logs\\SmartUcf\\";
+        public const string SmartUCFLogsRoot = "X:\\Logs\\SmartUCF\\";
 
         /// <summary>
         /// "06", "07", "08", "09"
         /// </summary>
-        public static readonly string[] SmartUcfMachines = { "06", "07", "08", "09" };
+        public static readonly string[] SmartUCFMachines = { "06", "07", "08", "09" };
 
         /// <summary>
         /// default
         /// </summary>
-        public const string SmartUcfDefaultConfig = "default";
+        public const string SmartUCFDefaultConfig = "default";
 
-        public static readonly string[] SmartUcfConfigurations = { SmartUcfDefaultConfig };
+        public static readonly string[] SmartUCFConfigurations = { SmartUCFDefaultConfig };
 
         public static string GetSmartUCFRoute(string config = null, string machine = null, string date = null)
         {
             var paths = new List<string>()
             {
-                SmartUcfRoot
+                SmartUCFRoot
             };
 
             if (!string.IsNullOrEmpty(config))
@@ -142,8 +142,8 @@ namespace LogFilterWeb.Utility
 
         public static string GetSmartUCFMachineName(string fullFilePath, out string config)
         {
-            var supportedMachines = string.Join("|", SmartUcfMachines);
-            var targetFilePath = fullFilePath.Replace(SmartUcfRoot, string.Empty);
+            var supportedMachines = string.Join("|", SmartUCFMachines);
+            var targetFilePath = fullFilePath.Replace(SmartUCFRoot, string.Empty);
 
             var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
 

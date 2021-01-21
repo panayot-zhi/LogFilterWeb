@@ -13,7 +13,7 @@ namespace LogFilterWeb.Services
         public static IEnumerable<StopwatchFile> GetOverallStopwatchData(DateTime from, DateTime to)
         {
             // TODO: Remove ToList here
-            var smartUCFRoute = Constants.GetSmartUCFRoute(Constants.SmartUcfDefaultConfig);
+            var smartUCFRoute = Constants.GetSmartUCFRoute(Constants.SmartUCFDefaultConfig);
             var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv").ToList();
             
             var filesInRange = csvFiles.Where(x =>
