@@ -14,10 +14,11 @@
     top: 20px;
 }
 
-/* Header Chart Loader */
-.headerChartLoader,
-.headerChartLoader::before,
-.headerChartLoader::after {
+/* Vertical Bars Loader */
+
+.verticalBarsLoader,
+.verticalBarsLoader::before,
+.verticalBarsLoader::after {
     border-radius: 50%;
     width: 2.5em;
     height: 2.5em;
@@ -27,7 +28,7 @@
     animation: load7 1.8s infinite ease-in-out;
 }
 
-.headerChartLoader {
+.verticalBarsLoader {
     color: #ffffff;
     font-size: 10px;
     margin: 80px auto;
@@ -40,20 +41,20 @@
     animation-delay: -0.16s;
 }
 
-.headerChartLoader::before,
-.headerChartLoader::after {
+.verticalBarsLoader::before,
+.verticalBarsLoader::after {
     content: '';
     position: absolute;
     top: 0;
 }
 
-.headerChartLoader::before {
+.verticalBarsLoader::before {
     left: -3.5em;
     -webkit-animation-delay: -0.32s;
     animation-delay: -0.32s;
 }
 
-.headerChartLoader:after {
+.verticalBarsLoader:after {
     left: 3.5em;
 }
 
