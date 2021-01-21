@@ -14,7 +14,7 @@ namespace LogFilterWeb.Utility
 {
     public static class FilesHelper
     {
-        public static bool ThrowIfNotDate = true;
+        private static bool ThrowIfNotDate = true;
         public static bool UseCache = true;
 
         private static readonly MemoryCache Cache = new MemoryCache(new MemoryCacheOptions()
@@ -36,20 +36,28 @@ namespace LogFilterWeb.Utility
             return new StopwatchFile()
             {
                 FullName = fullFileName,
-                Date = ToDateTime(directoryName).Value,
+                Date = ToDateTime(directoryName),
                 ServerName = Constants.GetSmartUCFMachineName(fullFileName,out _),
                 Records = ReadStopWatchRecords(fullFileName).ToList()   // TODO: Remove ToList
             };
         }
 
+        public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(FileInfo fileInfo)
+        {
+            return ReadStopWatchRecords(fileInfo.FullName);
+        }
+
         public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
         {
+            var machineName = Constants.GetSmartUCFMachineName(filePath, out _);
+
             return File.ReadLines(filePath)
-                .Select(line => line.Split(','))
+                .Select(line => line.Split(',')
+                    .Select(x => x.Trim()).ToArray())
                 .Select(columns => new StopwatchRecord()
                 {
-                    Date = ToDateTime(columns[0]).Value,
-
+                    Date = ToDateTime(columns[0]),
+                    MachineName = machineName,
                     User = columns[1],
                     ListName = columns[2],
                     NumberOfRows = int.Parse(columns[3]),
@@ -58,7 +66,7 @@ namespace LogFilterWeb.Utility
                 });
         }
 
-        public static DateTime? ToDateTime(string target)
+        public static DateTime ToDateTime(string target)
         {
             var supportedFormats = new[]
             {
@@ -80,7 +88,7 @@ namespace LogFilterWeb.Utility
                 throw new ArgumentException($"The specified argument '{target}' is not a date in the supported formats: '{string.Join(", ", supportedFormats)}'.");
             }
 
-            return null;
+            return default;
         }
     }
 }

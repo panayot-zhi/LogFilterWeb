@@ -9,6 +9,8 @@ namespace LogFilterWeb.Models.Domain
     {
         public DateTime Date { get; set; }
 
+        public string MachineName { get; set; }
+
         public string User { get; set; }
 
         public string ListName { get; set; }

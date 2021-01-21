@@ -14,7 +14,7 @@ namespace LogFilterWeb.Controllers
         {
             var vModel = new SmartUCF()
             {
-                StopwatchFiles = SmartUCFService.GetOverallStopwatchData(DateTime.Now.AddDays(-7), DateTime.Now)
+                StopwatchFiles = SmartUCFService.GetStopwatchFilesForRange(DateTime.Now.AddDays(-7), DateTime.Now)
             };
 
             return View(vModel);

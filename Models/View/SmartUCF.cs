@@ -8,6 +8,12 @@ namespace LogFilterWeb.Models.View
 {
     public class SmartUCF
     {
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndDate { get; set; }
+
+        public string CurrentList { get; set; }
+
         public IEnumerable<StopwatchFile> StopwatchFiles { get; set; }
     }
 }

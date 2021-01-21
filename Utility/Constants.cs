@@ -106,7 +106,11 @@ namespace LogFilterWeb.Utility
         /// <summary>
         /// "06", "07", "08", "09"
         /// </summary>
-        public static readonly string[] SmartUCFMachines = { "06", "07", "08", "09" };
+        public static readonly string[] SmartUCFMachines =
+        {
+            "01", "02", "04", "05", // TODO: Remove this after testing!
+            "06", "07", "08", "09"
+        };
 
         /// <summary>
         /// default
