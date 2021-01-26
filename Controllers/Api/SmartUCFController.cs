@@ -18,9 +18,10 @@ namespace LogFilterWeb.Controllers.Api
         [Route("api/smartUCF/stopwatchListData")]
         public dynamic GetStopwatchListData(string listName)
         {
-            // TODO: Resolve 'from' and 'to' from cookie here
-            var to = FilesHelper.ToDateTime("2019-11-22");
-            var from = to;
+            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
+            
+            var from = cookieData.StartDate;
+            var to = cookieData.EndDate;
 
             var data = SmartUCFService.GetStopwatchRecordsForRange(from, to);
 

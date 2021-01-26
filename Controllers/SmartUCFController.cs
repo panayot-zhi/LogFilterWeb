@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LogFilterWeb.Models.View;
 using LogFilterWeb.Services;
+using LogFilterWeb.Utility;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LogFilterWeb.Controllers
@@ -12,10 +13,9 @@ namespace LogFilterWeb.Controllers
     {
         public IActionResult Index()
         {
-            var vModel = new SmartUCF()
-            {
-                StopwatchFiles = SmartUCFService.GetStopwatchFilesForRange(DateTime.Now.AddDays(-7), DateTime.Now)
-            };
+            var vModel = this.ReadCookie<SmartUCF>(Constants.SmartUCFConfigCookieName);
+
+            // TODO: Fill other viewModel properties
 
             return View(vModel);
         }
