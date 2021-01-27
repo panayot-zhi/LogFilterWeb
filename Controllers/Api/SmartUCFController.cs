@@ -23,7 +23,7 @@ namespace LogFilterWeb.Controllers.Api
             var from = cookieData.StartDate;
             var to = cookieData.EndDate;
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(from, to);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(from.Date, to.Date);
 
             var query = data.AsParallel();
 
