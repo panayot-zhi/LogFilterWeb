@@ -7,8 +7,21 @@ namespace LogFilterWeb.Utility
 {
     public class DateRange
     {
-        public DateTime StartDate { get; set; } = DateTime.Now.Date.AddDays(-7);
+        private DateTimeOffset _startDate = DateTime.Now.Date.AddDays(-7);
+        private DateTimeOffset _endDate = DateTime.Now.Date;
 
-        public DateTime EndDate { get; set; } = DateTime.Now.Date;
+        public DateTimeOffset StartDate
+        {
+            get => _startDate.ToLocalTime();
+            set => _startDate = value;
+        }
+
+        public DateTimeOffset EndDate
+        {
+            get => _endDate.ToLocalTime();
+            set => _endDate = value;
+        }
+
+        public bool SingleDate => StartDate.Equals(EndDate);
     }
 }
