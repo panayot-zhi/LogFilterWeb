@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using LogFilterWeb.Models.View;
+using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Services;
 using LogFilterWeb.Utility;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ namespace LogFilterWeb.Controllers
     {
         public IActionResult Index()
         {
-            var vModel = this.ReadCookie<SmartUCF>(Constants.SmartUCFConfigCookieName);
+            var vModel = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
 
             // TODO: Fill other viewModel properties
 
@@ -23,7 +23,7 @@ namespace LogFilterWeb.Controllers
 
         public IActionResult GetCsvZip(string[] filePaths)
         {
-            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
+            var cookieData = this.ReadCookie<DateRange>(SmartUCF.CookieName);
             return new FileContentResult(FilesHelper.ZipSmartUCFCsvFiles(filePaths), "application/octet-stream")
             {
                 FileDownloadName = $"{cookieData.StartDate:yyyy-MM-dd}_CSV_{cookieData.EndDate:yyyy-MM-dd}.zip"
@@ -32,7 +32,7 @@ namespace LogFilterWeb.Controllers
 
         public IActionResult GetLogsZip(string[] filePaths)
         {
-            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
+            var cookieData = this.ReadCookie<DateRange>(SmartUCF.CookieName);
             return new FileContentResult(FilesHelper.ZipSmartUCFLogFiles(filePaths), "application/octet-stream")
             {
                 FileDownloadName = $"{cookieData.StartDate:yyyy-MM-dd}_LOGS_{cookieData.EndDate:yyyy-MM-dd}.zip"

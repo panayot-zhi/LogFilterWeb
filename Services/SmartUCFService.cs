@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Utility;
 
@@ -11,12 +10,18 @@ namespace LogFilterWeb.Services
 {
     public static class SmartUCFService
     {
-        public static IEnumerable<StopwatchRecord> GetStopwatchRecordsForRange(DateTime from, DateTime to, ref dynamic meta)
+        public static IEnumerable<StopwatchRecord> GetStopwatchRecordsForRange(SmartUCF cookieData, ref dynamic meta)
         {
+            var activeServers = cookieData.MonitoredServers;
+            var from = cookieData.StartDate.Date;
+            var to = cookieData.EndDate.Date;
+
             var smartUCFRoute = FilesHelper.GetSmartUCFRoute(Constants.SmartUCFDefaultConfig);
             var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv");
 
-            var filesInRange = csvFiles.Where(x =>
+            var filesInRange = csvFiles.Where(x => // config/machineName/yyyy-MM-dd/[stopwatch]-lists.csv
+                x.Directory?.Parent != null && 
+                activeServers.Contains(x.Directory.Parent.Name) &&
                 FilesHelper.ToDateTime(x.Directory.Name) >= from.Date &&
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
@@ -34,7 +39,6 @@ namespace LogFilterWeb.Services
             meta.from = from;
             meta.config = Constants.SmartUCFDefaultConfig;
             meta.files = filesInRangeArray.Select(x => x.FullName);
-            meta.machines = filesInRangeArray.Select(x => FilesHelper.GetSmartUCFMachineName(x.FullName, out _));
             meta.to = to;
 
             return stopwatchRecords;

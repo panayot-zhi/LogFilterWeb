@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Threading.Tasks;
+using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Services;
 using LogFilterWeb.Utility;
@@ -18,17 +16,19 @@ namespace LogFilterWeb.Controllers.Api
         [Route("api/smartUCF/stopwatchListData")]
         public dynamic GetStopwatchListData(string listName)
         {
-            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
 
             dynamic meta = new ExpandoObject();
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date, ref meta);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
             var query = data.AsParallel();
 
             if (!string.IsNullOrEmpty(listName))
             {
                 query = query.Where(x => x.ListName == listName);
             }
+
+            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
             {
@@ -40,11 +40,11 @@ namespace LogFilterWeb.Controllers.Api
                         var byListRecords = groupByList as StopwatchRecord[] ?? groupByList.ToArray();
 
                         var serverDataList = new List<dynamic>();
-                        foreach (var machineName in Constants.SmartUCFMachines)
+                        foreach (var machineName in cookieData.MonitoredServers)
                         {
                             serverDataList.Add(new
                             {
-                                Server = machineName,
+                                Name = machineName,
                                 Retrieved = byListRecords.Where(x => x.MachineName == machineName)
                                     .Sum(x => x.NumberOfRows)
                             });
@@ -61,7 +61,7 @@ namespace LogFilterWeb.Controllers.Api
                             MaxRetrieveTime = byListRecords.Max(x => x.RetrieveMilliseconds),
                             AvgRetrieveTime = byListRecords.Average(x => x.RetrieveMilliseconds),
 
-                            Servers = serverDataList
+                            Servers = serverDataList.OrderBy(x => x.Name)
 
                             /*Servers = byListRecords.GroupBy(keySelector: x => x.MachineName,
                                 resultSelector: (machineName, groupByMachine) =>
