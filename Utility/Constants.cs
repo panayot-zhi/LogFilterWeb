@@ -9,10 +9,6 @@ namespace LogFilterWeb.Utility
 {
     public static class Constants
     {
-
-        public const string SmartUCFConfigCookieName = "SmartUCFConfig";
-        public const string SUOSConfigCookieName = "SUOSConfig";
-
         /// <summary>
         /// yyyy-MM-dd
         /// </summary>
