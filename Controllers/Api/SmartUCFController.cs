@@ -19,11 +19,8 @@ namespace LogFilterWeb.Controllers.Api
         public dynamic GetStopwatchListData(string listName)
         {
             var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
-            
-            var from = cookieData.StartDate;
-            var to = cookieData.EndDate;
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(from.Date, to.Date);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date);
 
             var query = data.AsParallel();
 
@@ -33,20 +30,44 @@ namespace LogFilterWeb.Controllers.Api
             }
 
             return query.GroupBy(keySelector: record => record.ListName,
-                resultSelector: (key, records) =>
+                resultSelector: (list, groupByList) =>
                 {
                     // NOTE: Enumerate to array to avoid multiple enumerations
-                    var stopwatchRecords = records as StopwatchRecord[] ?? records.ToArray();
+                    var byListRecords = groupByList as StopwatchRecord[] ?? groupByList.ToArray();
 
+                    var serverDataList = new List<dynamic>();
+                    foreach (var machineName in Constants.SmartUCFMachines)
+                    {
+                        serverDataList.Add(new { Server = machineName, Retrieved = byListRecords.Where(x => x.MachineName == machineName).Sum(x => x.NumberOfRows)});
+                    }
+                    
                     return new
                     {
-                        ListName = key,
-                        TotalRecords = stopwatchRecords.Length,
-                        TotalRowsRetrieved = stopwatchRecords.Sum(x => x.NumberOfRows),
-                        MaxRowsRetrieved = stopwatchRecords.Max(x => x.NumberOfRows),
-                        AvgRowsRetrieved = stopwatchRecords.Average(x => x.NumberOfRows),
-                        MaxRetrieveTime = stopwatchRecords.Max(x => x.RetrieveMilliseconds),
-                        AvgRetrieveTime = stopwatchRecords.Average(x => x.RetrieveMilliseconds)
+                        Id = list,
+                        ListName = list,
+                        TotalRecords = byListRecords.Length,
+                        TotalRowsRetrieved = byListRecords.Sum(x => x.NumberOfRows),
+                        MaxRowsRetrieved = byListRecords.Max(x => x.NumberOfRows),
+                        AvgRowsRetrieved = byListRecords.Average(x => x.NumberOfRows),
+                        MaxRetrieveTime = byListRecords.Max(x => x.RetrieveMilliseconds),
+                        AvgRetrieveTime = byListRecords.Average(x => x.RetrieveMilliseconds),
+                        
+                        Servers = serverDataList
+
+                        /*Servers = byListRecords.GroupBy(keySelector: x => x.MachineName,
+                            resultSelector: (machineName, groupByMachine) =>
+                            {
+                                // NOTE: Enumerate to array to avoid multiple enumerations
+                                var byMachineRecords = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+
+
+                                return new
+                                {
+                                    Server = machineName,
+                                    Retrieved = byMachineRecords.Sum(x => x.NumberOfRows)
+                                };
+
+                            })*/
                     };
 
                 }).OrderByDescending(x => x.TotalRowsRetrieved);
@@ -56,11 +77,9 @@ namespace LogFilterWeb.Controllers.Api
         [Route("api/smartUCF/stopwatchServerDataByDay")]
         public dynamic GetStopwatchServerDataByDay(string serverName)
         {
-            // TODO: Resolve 'from' and 'to' from cookie here
-            var to = FilesHelper.ToDateTime("2019-11-22");
-            var from = to.AddDays(-7);
+            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(from, to);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date);
 
             var query = data.AsParallel();
 
