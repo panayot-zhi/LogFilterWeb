@@ -403,6 +403,7 @@
             if (!data) {
 
                 loaderRow.show();
+                loaderRow.nextAll().hide();
 
                 $.ajax({
                     url: '@Url.Action("GetStopwatchListData")',
