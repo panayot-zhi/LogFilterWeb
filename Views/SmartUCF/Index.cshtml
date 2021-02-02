@@ -141,7 +141,7 @@
                                 <input class="dropdown-item" type="submit" value="Get Logs Zip" />
                             </form>
 
-                            <a class="dropdown-item text-danger" href="#">Remove Data</a>
+                            <a id="refreshListsUsageTable" class="dropdown-item text-danger" href="#">Refresh Data</a>
                         </div>
                     </div>
                 </div>
@@ -335,12 +335,66 @@
                 });
         }
 
+        function initializeMonitorServersPicker() {
+            $('#monitoredServersList').on('click',
+                ".dropdown-item",
+                function(e) {
+                    var serverName = this.id.replace("display_server_", "");
+
+                    var jsonCookieData = {};
+                    var cookieData = Cookies.get(smartUCFCookieName);
+
+                    if (cookieData) {
+                        jsonCookieData = JSON.parse(cookieData);
+                    }
+
+                    if (!jsonCookieData.monitoredServers) {
+                        jsonCookieData.monitoredServers = [];
+                    }
+
+                    var active = $(this).hasClass('active');
+                    if (active) {
+                        var index = jsonCookieData.monitoredServers.indexOf(serverName);
+                        if (index > -1) {
+                            jsonCookieData.monitoredServers.splice(index, 1);
+                        }
+                    } else {
+                        jsonCookieData.monitoredServers.push(serverName);
+                    }
+
+                    Cookies.set(smartUCFCookieName, JSON.stringify(jsonCookieData));
+
+                    window.location.reload(true);
+                });
+        }
+
         function getSelectedListsFromTable() {
             var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
             return selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
         }
 
-        function initializeTable(data) {
+        function updateListsUsageTable(data) {
+
+            function constructMeta(meta) {
+                $('#getCsvZip input[name="filePaths"]').remove();
+                $('#getLogsZip input[name="filePaths"]').remove();
+                $('#listsUsageTableCard .card-footer .stats .dropup .dropdown-menu a').remove();
+
+                for (var i = 0; i < meta.files.length; i++) {
+
+                    var file = meta.files[i];
+
+                    $("#getCsvZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
+                    $("#getLogsZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
+
+                    $('#listsUsageTableCard .card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${file}</a>`);
+                }
+
+                $('#listsUsageTableCard .card-footer .stats-info').text(`
+                            Consolidation summary from ${meta.files.length} files
+                            in the period from ${moment(meta.from).format('yyyy-MM-DD')}
+                            to ${moment(meta.to).format('yyyy-MM-DD')}.`);
+            }
 
             var table = $(`#listsUsageTable`);
             var tableBody = table.children('tbody');
@@ -354,30 +408,8 @@
                     url: '@Url.Action("GetStopwatchListData")',
                     success: function(r) {
                         //console.log(r);
-                        table.trigger('data-bound.table.now-ui', [r.results]);
-
-                        $('#getCsvZip input[name="filePaths"]').remove();
-                        $('#getLogsZip input[name="filePaths"]').remove();
-                        $('#listsUsageTableCard .card-footer .stats .dropup .dropdown-menu a').remove();
-
-                        var i;
-                        const meta = r.meta;
-                        for (i = 0; i < meta.files.length; i++) {
-
-                            var file = meta.files[i];
-
-                            $("#getCsvZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
-                            $("#getLogsZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
-
-                            $('#listsUsageTableCard .card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${file}</a>`);
-                        }
-
-                        $('#listsUsageTableCard .card-footer .stats-info').text(`
-                            Consolidation summary from ${meta.files.length} files
-                            in the period from ${moment(meta.from).format('yyyy-MM-DD')}
-                            to ${moment(meta.to).format('yyyy-MM-DD')}.`);
-
-                        initializeTable(r.results);
+                        updateListsUsageTable(r.results);
+                        constructMeta(r.meta);
                     }
                 });
 
@@ -474,19 +506,53 @@
             }
         }
 
+        function updateListsPieChart(data, pieChart) {
 
-        function initializeListsPieChart(data) {
+            function formatData(raw) {
+
+                var selectedLists = getSelectedListsFromTable();
+
+                var labels = ["NotIncluded"];
+                var colors = [chartColors.grey];
+                var datasets = [0];
+
+
+                for (var i = 0; i < raw.length; i++) {
+                    var current = raw[i];
+
+                    if (selectedLists.includes(current.id)) {
+                        labels.push(current.listName);
+                        datasets.push(current.totalRowsRetrieved);
+                        colors.push(availableColors[i]);
+                        continue;
+                    }
+
+                    datasets[0] += current.totalRowsRetrieved;
+                }
+
+                return {
+                    datasets: [
+                        {
+                            data: datasets,
+                            backgroundColor: colors
+                        }
+                    ],
+
+                    labels: labels
+                }
+            }
 
             if (!data) {
                 throw Error("No data! Pie chart cannot initialize.");
             }
 
-            var pieChart = $("#listsUsagePieChart");
+            if (pieChart) {
+                pieChart.data = formatData(data, getSelectedListsFromTable());
+                pieChart.update();
+                return null;
+            }
+
             var pieChartLoader = $("#listsUsagePieChartLoader");
-
-            var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
-            var selectedLists = selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
-
             var ctx = document.getElementById("listsUsagePieChart").getContext("2d");
             //var fill = drawGreenCanvasBackground(ctx);
 
@@ -495,7 +561,7 @@
             return new Chart(ctx,
                 {
                     type: 'pie',
-                    data: formatListsPieChartData(data),
+                    data: formatData(data),
 
                     options: {
                         tooltips: {
@@ -526,69 +592,66 @@
                 });
         }
 
-        function formatListsPieChartData(data) {
+        function updateServersPieChart(data, pieChart) {
 
-            var selectedLists = getSelectedListsFromTable();
+            function formatData(raw) {
 
-            var labels = ["NotIncluded"];
-            var colors = [chartColors.grey];
-            var datasets = [0];
+                var labels = [];
+                var colors = [];
 
-
-            for (var i = 0; i < data.length; i++) {
-                var current = data[i];
-
-                if (selectedLists.includes(current.id)) {
-                    labels.push(current.listName);
-                    datasets.push(current.totalRowsRetrieved);
-                    colors.push(availableColors[i]);
-                    continue;
+                if (raw.length) {
+                    for (var j = 0; j < raw[0].servers.length; j++) {
+                        var serverName = raw[0].servers[j].name;
+                        labels.push(`Сървър S${serverName}`);
+                        colors.push(availableColors[smartUCFServers.indexOf(serverName)]);
+                    }
                 }
 
-                datasets[0] += current.totalRowsRetrieved;
-            }
+                var selectedLists = getSelectedListsFromTable();
+                var datasets = [];
 
-            return {
-                datasets: [
-                    {
-                        data: datasets,
-                        backgroundColor: colors
+                for (var i = 0; i < raw.length; i++) {
+                    var current = raw[i];
+
+                    if (!selectedLists.includes(current.id)) {
+                        continue;
                     }
-                ],
 
-                labels: labels
+                    var dataset = {
+                        data: current.servers.map(x => x.retrieved),
+                        backgroundColor: colors
+                    };
+
+                    datasets.push(dataset);
+
+                }
+
+                return {
+                    datasets: datasets,
+                    labels: labels
+                }
             }
-        }
-
-        function updateListsPieChartData(pieChart, data) {
-            pieChart.data = formatListsPieChartData(data, getSelectedListsFromTable());
-            pieChart.update();
-        }
-
-
-        function initializeServersPieChart(data) {
 
             if (!data) {
                 throw Error("No data! Pie chart cannot initialize.");
             }
 
-            var pieChart = $("#serversUsagePieChart");
+            if (pieChart) {
+                pieChart.data = formatData(data, getSelectedListsFromTable());
+                pieChart.update();
+                return null;
+            }
+
             var pieChartLoader = $("#serversUsagePieChartLoader");
-
-            //var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
-            //var selectedLists = selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
-
             var ctx = document.getElementById("serversUsagePieChart").getContext("2d");
             //var fill = drawGreenCanvasBackground(ctx);
 
             pieChartLoader.hide();
 
-            var formattedData = formatServersPieChart(data);
-
             return new Chart(ctx,
                 {
                     type: 'pie',
-                    data: formattedData,
+                    data: formatData(data),
 
                     options: {
                         tooltips: {
@@ -618,54 +681,12 @@
                 });
         }
 
-        function formatServersPieChart(data) {
-
-            var labels = [];
-            var colors = [];
-
-            if (data.length) {
-                for (var j = 0; j < data[0].servers.length; j++) {
-                    var serverName = data[0].servers[j].name;
-                    labels.push(`Сървър S${serverName}`);
-                    colors.push(availableColors[smartUCFServers.indexOf(serverName)]);
-                }
-            }
-
-            var selectedLists = getSelectedListsFromTable();
-            var datasets = [];
-
-            for (var i = 0; i < data.length; i++) {
-                var current = data[i];
-
-                if (!selectedLists.includes(current.id)) {
-                    continue;
-                }
-
-                var dataset = {
-                    data: current.servers.map(x => x.retrieved),
-                    backgroundColor: colors
-                };
-
-                datasets.push(dataset);
-
-            }
-
-            return {
-                datasets: datasets,
-                labels: labels
-            }
-        }
-
-        function updateServersPieChartData(pieChart, data) {
-            pieChart.data = formatServersPieChart(data, getSelectedListsFromTable());
-            pieChart.update();
-        }
-
         $(document).ready(function() {
             const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";
             const modelEndDate = "@Model.EndDate.ToString("dd.MM.yyyy")";
             initializeDateRangePicker(modelStartDate, modelEndDate);
-            initializeTable();
+            initializeMonitorServersPicker();
+            updateListsUsageTable();
 
             var tableData;
             var listsPieChart;
@@ -675,20 +696,14 @@
             listUsageTable.on("constructed.table.now-ui",
                 function(e, data) {
                     tableData = data;
-                    listsPieChart = initializeListsPieChart(data);
-                    serversPieChart = initializeServersPieChart(data);
-                });
-
-            listUsageTable.on("selected.table.now-ui",
-                function(e, element, selected, index) {
-                    updateListsPieChartData(listsPieChart, tableData);
-                    updateServersPieChartData(serversPieChart, tableData);
+                    listsPieChart = updateListsPieChart(data);
+                    serversPieChart = updateServersPieChart(data);
                 });
 
             listUsageTable.on("updated.table.now-ui",
-                function(e, element, selected, index) {
-                    updateListsPieChartData(listsPieChart, tableData);
-                    updateServersPieChartData(serversPieChart, tableData);
+                function() {
+                    updateListsPieChart(tableData, listsPieChart);
+                    updateServersPieChart(tableData, serversPieChart);
                 });
 
             listUsageTable.on('click',
@@ -706,7 +721,7 @@
                         row.removeAttr("style");
                     }
 
-                    listUsageTable.trigger('selected.table.now-ui', [e.target, e.target.checked, index]);
+                    listUsageTable.trigger('updated.table.now-ui', [e.target, e.target.checked, index]);
                 });
 
             listUsageTable.on('click',
@@ -714,63 +729,37 @@
                 function(e) {
                     e.preventDefault();
 
-                    var me = $(this);
-                    var descendingOrder = me.hasClass("desc");
-                    var propertyName = me.attr("id").replace("sort_by_", "");
+                    var anchor = $(e.target);
+                    var descendingOrder = anchor.hasClass("desc");
+                    var propertyName = anchor.attr("id").replace("sort_by_", "");
 
                     $("#listsUsageTable thead a.sortable i").remove();
                     $("#listsUsageTable thead a.sortable").removeClass("asc");
                     $("#listsUsageTable thead a.sortable").removeClass("desc");
 
                     if (!descendingOrder) {
-                        me.addClass("desc");
-                        me.append(`<i class="now-ui-icons arrows-1_minimal-down"></i>`);
+                        anchor.addClass("desc");
+                        anchor.append(`<i class="now-ui-icons arrows-1_minimal-down"></i>`);
                         tableData.sort(function(a, b) {
                             return b[propertyName] - a[propertyName];
                         });
                     } else {
-                        me.addClass("asc");
-                        me.append(`<i class="now-ui-icons arrows-1_minimal-up"></i>`);
+                        anchor.addClass("asc");
+                        anchor.append(`<i class="now-ui-icons arrows-1_minimal-up"></i>`);
                         tableData.sort(function(a, b) {
                             return a[propertyName] - b[propertyName];
                         });
                     }
 
-                    initializeTable(tableData);
-                    listUsageTable.trigger('sorted.table.now-ui', [e.target, descendingOrder]);
+                    updateListsUsageTable(tableData);
+                    listUsageTable.trigger('updated.table.now-ui', [e.target, descendingOrder]);
                 });
 
-            $("#monitoredServersList").on('click',
-                ".dropdown-item",
+            $("#refreshListsUsageTable").on('click',
                 function(e) {
-                    var serverName = this.id.replace("display_server_", "");
-
-                    var jsonCookieData = {};
-                    var cookieData = Cookies.get(smartUCFCookieName);
-
-                    if (cookieData) {
-                        jsonCookieData = JSON.parse(cookieData);
-                    }
-
-                    if (!jsonCookieData.monitoredServers) {
-                        jsonCookieData.monitoredServers = [];
-                    }
-
-                    var active = $(this).hasClass('active');
-                    if (active) {
-                        var index = jsonCookieData.monitoredServers.indexOf(serverName);
-                        if (index > -1) {
-                            jsonCookieData.monitoredServers.splice(index, 1);
-                        }
-                    } else {
-                        jsonCookieData.monitoredServers.push(serverName);
-                    }
-
-                    Cookies.set(smartUCFCookieName, JSON.stringify(jsonCookieData));
-
-                    window.location.reload(true);
+                    e.preventDefault();
+                    updateListsUsageTable();
                 });
-
         });
     </script>
 }
