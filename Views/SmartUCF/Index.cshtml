@@ -183,16 +183,16 @@
                     <h4 class="card-title">Percentage of all lists usage</h4>
                     <p class="category">Displays the percent that the chosen lists represent in comparison to all records in the monitored period.</p>
                     @*
-        <div class="dropdown">
-            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
-                <i class="now-ui-icons loader_gear"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-right">
-                <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
-                <a class="dropdown-item" href="#">Get Stopwatch ZIP</a>
-                <a class="dropdown-item text-danger" href="#">Remove Data</a>
-            </div>
-        </div>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
+                                <i class="now-ui-icons loader_gear"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
+                                <a class="dropdown-item" href="#">Get Stopwatch ZIP</a>
+                                <a class="dropdown-item text-danger" href="#">Remove Data</a>
+                            </div>
+                        </div>
                     *@
                 </div>
                 <div class="card-body">
@@ -217,16 +217,16 @@
                 <div class="card-header">
                     <h4 class="card-title">Servers usage proportion</h4>
                     @*
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
-                            <i class="now-ui-icons loader_gear"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
-                            <a class="dropdown-item" href="#">Get Stopwatch ZIP</a>
-                            <a class="dropdown-item text-danger" href="#">Remove Data</a>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
+                                <i class="now-ui-icons loader_gear"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
+                                <a class="dropdown-item" href="#">Get Stopwatch ZIP</a>
+                                <a class="dropdown-item text-danger" href="#">Remove Data</a>
+                            </div>
                         </div>
-                    </div>
                     *@
                 </div>
                 <div class="card-body">
@@ -297,22 +297,22 @@
             return selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
         }
 
-        function initializeTable(data) {
+        function initializeTable(response) {
 
             var table = $(`#listsUsageTable`);
             var tableBody = table.children('tbody');
             var loaderRow = table.find("#listsUsageTableLoader");
 
-            if (!data) {
+            if (!response) {
 
                 loaderRow.show();
 
                 $.ajax({
                     url: '@Url.Action("GetStopwatchListData")',
-                    success: function(response) {
-                        console.log(response);
-                        table.trigger('data-bound.table.now-ui', [response]);
-                        initializeTable(response);
+                    success: function(r) {
+                        //console.log(r);
+                        table.trigger('data-bound.table.now-ui', [r.results]);
+                        initializeTable(r);
                     }
                 });
 
@@ -323,6 +323,8 @@
             loaderRow.nextAll().remove();
 
             var checked = true;
+            var meta = response.meta;
+            var data = response.results;
             for (var i = 0; i < data.length; i++) {
                 var listData = data[i];
 
@@ -417,6 +419,7 @@
         }
 
 
+
         function initializeListsPieChart(data) {
 
             if (!data) {
@@ -508,6 +511,7 @@
         }
 
 
+
         function initializeServersPieChart(data) {
 
             if (!data) {
@@ -593,6 +597,8 @@
             pieChart.data = formatServersPieChart(data, getSelectedListsFromTable());
             pieChart.update();
         }
+
+
 
         $(document).ready(function() {
             const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";

@@ -20,8 +20,9 @@ namespace LogFilterWeb.Controllers.Api
         {
             var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date);
+            dynamic meta = new ExpandoObject();
 
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date, ref meta);
             var query = data.AsParallel();
 
             if (!string.IsNullOrEmpty(listName))
@@ -29,58 +30,68 @@ namespace LogFilterWeb.Controllers.Api
                 query = query.Where(x => x.ListName == listName);
             }
 
-            return query.GroupBy(keySelector: record => record.ListName,
-                resultSelector: (list, groupByList) =>
-                {
-                    // NOTE: Enumerate to array to avoid multiple enumerations
-                    var byListRecords = groupByList as StopwatchRecord[] ?? groupByList.ToArray();
-
-                    var serverDataList = new List<dynamic>();
-                    foreach (var machineName in Constants.SmartUCFMachines)
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: record => record.ListName,
+                    resultSelector: (list, groupByList) =>
                     {
-                        serverDataList.Add(new { Server = machineName, Retrieved = byListRecords.Where(x => x.MachineName == machineName).Sum(x => x.NumberOfRows)});
-                    }
-                    
-                    return new
-                    {
-                        Id = list,
-                        TotalRecords = byListRecords.Length,
-                        ListName = Constants.SmartUCFListDisplayName[list],
-                        TotalRowsRetrieved = byListRecords.Sum(x => x.NumberOfRows),
-                        MaxRowsRetrieved = byListRecords.Max(x => x.NumberOfRows),
-                        AvgRowsRetrieved = byListRecords.Average(x => x.NumberOfRows),
-                        MaxRetrieveTime = byListRecords.Max(x => x.RetrieveMilliseconds),
-                        AvgRetrieveTime = byListRecords.Average(x => x.RetrieveMilliseconds),
-                        
-                        Servers = serverDataList
+                        // NOTE: Enumerate to array to avoid multiple enumerations
+                        var byListRecords = groupByList as StopwatchRecord[] ?? groupByList.ToArray();
 
-                        /*Servers = byListRecords.GroupBy(keySelector: x => x.MachineName,
-                            resultSelector: (machineName, groupByMachine) =>
+                        var serverDataList = new List<dynamic>();
+                        foreach (var machineName in Constants.SmartUCFMachines)
+                        {
+                            serverDataList.Add(new
                             {
-                                // NOTE: Enumerate to array to avoid multiple enumerations
-                                var byMachineRecords = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+                                Server = machineName,
+                                Retrieved = byListRecords.Where(x => x.MachineName == machineName)
+                                    .Sum(x => x.NumberOfRows)
+                            });
+                        }
 
+                        return new
+                        {
+                            Id = list,
+                            TotalRecords = byListRecords.Length,
+                            ListName = Constants.SmartUCFListDisplayName[list],
+                            TotalRowsRetrieved = byListRecords.Sum(x => x.NumberOfRows),
+                            MaxRowsRetrieved = byListRecords.Max(x => x.NumberOfRows),
+                            AvgRowsRetrieved = byListRecords.Average(x => x.NumberOfRows),
+                            MaxRetrieveTime = byListRecords.Max(x => x.RetrieveMilliseconds),
+                            AvgRetrieveTime = byListRecords.Average(x => x.RetrieveMilliseconds),
 
-                                return new
+                            Servers = serverDataList
+
+                            /*Servers = byListRecords.GroupBy(keySelector: x => x.MachineName,
+                                resultSelector: (machineName, groupByMachine) =>
                                 {
-                                    Server = machineName,
-                                    Retrieved = byMachineRecords.Sum(x => x.NumberOfRows)
-                                };
+                                    // NOTE: Enumerate to array to avoid multiple enumerations
+                                    var byMachineRecords = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+    
+    
+                                    return new
+                                    {
+                                        Server = machineName,
+                                        Retrieved = byMachineRecords.Sum(x => x.NumberOfRows)
+                                    };
+    
+                                })*/
+                        };
 
-                            })*/
-                    };
-
-                }).OrderByDescending(x => x.TotalRowsRetrieved);
+                    }).OrderByDescending(x => x.TotalRowsRetrieved)
+            };
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("api/smartUCF/stopwatchServerDataByDay")]
         public dynamic GetStopwatchServerDataByDay(string serverName)
         {
             var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
 
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date);
-
+            dynamic meta = new ExpandoObject();
+            
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date, ref meta);
             var query = data.AsParallel();
 
             if (!string.IsNullOrEmpty(serverName))
@@ -121,6 +132,6 @@ namespace LogFilterWeb.Controllers.Api
                             }).OrderBy(x => x.Date)
                     };
                 });
-        }
+        }*/
     }
 }
