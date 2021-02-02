@@ -1,5 +1,9 @@
 ﻿/* Panayot Ivanov */
 
+.sortable {
+    /*placeholder*/
+}
+
 /* NowUI Overrides */
 .card-chart .card-header .card-title {
     margin-bottom: 10px;
@@ -17,6 +21,21 @@
     position: absolute;
     right: 20px;
     top: 20px;
+}
+
+.card .card-footer .dropup button,
+.card .card-footer .dropdown button {
+    border-width: 0;
+    font-size: 24px;
+}
+
+.card .card-footer .dropdown {
+    position: relative;
+    right: inherit;
+    top: inherit;
+}
+.card-footer .stats-info {
+    color: #9A9A9A;
 }
 /* EOF NowUI Overrides */
 
