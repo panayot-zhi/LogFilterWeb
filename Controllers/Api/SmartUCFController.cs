@@ -44,8 +44,8 @@ namespace LogFilterWeb.Controllers.Api
                     return new
                     {
                         Id = list,
-                        ListName = list,
                         TotalRecords = byListRecords.Length,
+                        ListName = Constants.SmartUCFListDisplayName[list],
                         TotalRowsRetrieved = byListRecords.Sum(x => x.NumberOfRows),
                         MaxRowsRetrieved = byListRecords.Max(x => x.NumberOfRows),
                         AvgRowsRetrieved = byListRecords.Average(x => x.NumberOfRows),

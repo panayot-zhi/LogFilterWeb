@@ -112,47 +112,55 @@
 
 <div class="content">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="card">
                 <div class="card-header ">
-                    <h5 class="card-category">General analysis</h5>
-                    <h4 class="card-title">Lists usage</h4>
+                    <h5 class="card-category">General Analysis</h5>
+                    <h4 class="card-title">Lists usage table data</h4>
+                    <p class="category">Contains a breakdown by all lists in the monitored period</p>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="listsUsageTable" class="table table-striped table-hover">
+                        <table id="listsUsageTable" class="table">
                             <thead class="text-primary text-right">
-                                <tr>
-                                    <th class="text-right" style="width: 5%">
-                                        view
-                                    </th>
-                                    <th class="text-center" style="width: 5%">
-                                        #
-                                    </th>
-                                    <th class="text-left" style="width: 40%">
-                                        listName
-                                    </th>
-                                    <th class="text-right" style="width: 10%">
-                                        total Rows Retrieved
-                                    </th>
-                                    <th class="text-right" style="width: 10%">
-                                        total<br>Records
-                                    </th>
-                                    <th style="width: 10%">
-                                        avg<br>Rows Retrieved
-                                    </th>
-                                    <th style="width: 10%">
-                                        avg<br>Retrieve Time (ms)
-                                    </th>
-                                    <th style="width: 10%">
-                                        max<br>Retrieve Time (ms)
-                                    </th>
-                                </tr>
+                            <tr>
+                                <th class="text-right" style="width: 5%">
+                                    view
+                                </th>
+                                <th class="text-center" style="width: 5%">
+                                    #
+                                </th>
+                                <th class="text-left" style="width: 40%">
+                                    listName
+                                </th>
+                                <th class="text-right" style="width: 10%">
+                                    total Rows Retrieved
+                                </th>
+                                <th class="text-right" style="width: 10%">
+                                    total<br>Records
+                                </th>
+                                <th style="width: 10%">
+                                    avg<br>Rows Retrieved
+                                </th>
+                                <th style="width: 10%">
+                                    avg<br>Retrieve Time (ms)
+                                </th>
+                                <th style="width: 10%">
+                                    max<br>Retrieve Time (ms)
+                                </th>
+                            </tr>
                             </thead>
                             <tbody class="text-right">
                             <tr id="listsUsageTableLoader">
                                 <td colspan="8">
-                                    <div class="verticalBarsLoader text-primary">Зареждане...</div>
+                                    <div class="rect-spinner">
+                                        <div class="rect1 bg-primary"></div>
+                                        <div class="rect2 bg-primary"></div>
+                                        <div class="rect3 bg-primary"></div>
+                                        <div class="rect4 bg-primary "></div>
+                                        <div class="rect5 bg-primary"></div>
+                                        Loading
+                                    </div>
                                 </td>
                             </tr>
                             </tbody>
@@ -167,12 +175,48 @@
                 </div>
             </div>
         </div>
-        @*
-        <div class="col-lg-12">
+
+        <div class="col-lg-5">
             <div class="card card-chart">
                 <div class="card-header">
-                    <h5 class="card-category">Global Sales</h5>
-                    <h4 class="card-title">Shipped Products</h4>
+                    <h5 class="card-category">General Analysis</h5>
+                    <h4 class="card-title">Percentage of all lists usage</h4>
+                    <p class="category">Displays the percent that the chosen lists represent in comparison to all records in the monitored period.</p>
+                    @*
+        <div class="dropdown">
+            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
+                <i class="now-ui-icons loader_gear"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="#">Get Stopwatch ZIP</a>
+                <a class="dropdown-item text-danger" href="#">Remove Data</a>
+            </div>
+        </div>
+                    *@
+                </div>
+                <div class="card-body">
+                    <div id="listsUsagePieChartLoader">
+                        <div class="spinner">
+                            <div class="double-bounce1 bg-primary"></div>
+                            <div class="double-bounce2 bg-primary"></div>
+                        </div>
+                    </div>
+                    <div class="chart-area" style="height: auto;">
+                        <canvas id="listsUsagePieChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="stats">
+                        <i class="now-ui-icons arrows-1_refresh-69"></i> Just Updated
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-chart">
+                <div class="card-header">
+                    <h4 class="card-title">Servers usage proportion</h4>
+                    @*
                     <div class="dropdown">
                         <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
                             <i class="now-ui-icons loader_gear"></i>
@@ -183,13 +227,17 @@
                             <a class="dropdown-item text-danger" href="#">Remove Data</a>
                         </div>
                     </div>
+                    *@
                 </div>
                 <div class="card-body">
-                    <div id="pieChartLoader">
-                        <div class="verticalBarsLoader text-primary">Зареждане...</div>
+                    <div id="serversUsagePieChartLoader">
+                        <div class="spinner">
+                            <div class="double-bounce1 bg-primary"></div>
+                            <div class="double-bounce2 bg-primary"></div>
+                        </div>
                     </div>
                     <div class="chart-area" style="height: auto;">
-                        <canvas id="pieChart"></canvas>
+                        <canvas id="serversUsagePieChart"></canvas>
                     </div>
                 </div>
                 <div class="card-footer">
@@ -198,9 +246,10 @@
                     </div>
                 </div>
             </div>
+
         </div>
-        *@
-    </div>
+
+        </div>
 </div>
 
 @section footer {
@@ -209,6 +258,45 @@
 
 @section scripts {
     <script>
+
+        function initializeDateRangePicker(initialStartDate, initialEndDate) {
+
+            $('input[name="daterange"]').daterangepicker({
+                    "startDate": initialStartDate,
+                    "endDate": initialEndDate,
+                    "opens": "center",
+                    "locale": {
+                        "format": "DD.MM.YYYY",
+                        "firstDay": 1
+                    }
+                },
+                function(newStartDate, newEndDate) {
+
+                    //console.log("A new date selection was made: " + start.format('DD.MM.YYYY') + ' to ' + end.format('DD.MM.YYYY'));
+
+                    var jsonCookieData = {};
+                    var smartUCFConfigCookieName = '@Constants.SmartUCFConfigCookieName';
+                    var cookieData = Cookies.get(smartUCFConfigCookieName);
+
+                    if (cookieData) {
+                        jsonCookieData = JSON.parse(cookieData);
+                    }
+
+                    jsonCookieData.startDate = newStartDate.toDate();
+                    jsonCookieData.endDate = newEndDate.toDate();
+
+                    Cookies.set(smartUCFConfigCookieName, JSON.stringify(jsonCookieData));
+
+                    window.location.reload(true);
+
+                });
+        }
+
+        function getSelectedListsFromTable() {
+            var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
+            return selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
+        }
+
         function initializeTable(data) {
 
             var table = $(`#listsUsageTable`);
@@ -221,9 +309,10 @@
 
                 $.ajax({
                     url: '@Url.Action("GetStopwatchListData")',
-                    success: function(r) {
-                        table.trigger('data-bound.table.now-ui', [r]);
-                        initializeTable(r);
+                    success: function(response) {
+                        console.log(response);
+                        table.trigger('data-bound.table.now-ui', [response]);
+                        initializeTable(response);
                     }
                 });
 
@@ -233,20 +322,20 @@
             loaderRow.hide();
             loaderRow.nextAll().remove();
 
-            var displayInCharts = true;
+            var checked = true;
             for (var i = 0; i < data.length; i++) {
                 var listData = data[i];
 
-                if (i > 10) {
-                    displayInCharts = false;
+                if (i >= 5) {
+                    checked = false;
                 }
 
                 // row template
-                tableBody.append(`<tr>
+                tableBody.append(`<tr style="background-color: ${checked ? availableColors[i] : ""}">
                                 <td class="text-center">
                                     <div class="form-check">
                                         <label class="form-check-label">
-                                            <input class="form-check-input" type="checkbox" ${displayInCharts ? "checked" : ""}>
+                                            <input id="display_${listData.id}" class="form-check-input" type="checkbox" ${checked ? "checked" : ""}>
                                             <span class="form-check-sign"></span>
                                         </label>
                                     </div>
@@ -280,15 +369,15 @@
             var avgAllRows = Math.round(sumRowsRetrieved / sumRecords);
 
             // total row
-            tableBody.append(`<tr class="info">                                
+            tableBody.append(`<tr class="font-weight-bold">
                                 <td>
-                                   
+
                                 </td>
                                 <td>
-                                   
+
                                 </td>
                                 <td class="text-left">
-                                   <b>Total / Average:</b> 
+                                   <b>Total / Average:</b>
                                 </td>
                                 <td>
                                     ${parseFloat(sumRowsRetrieved).toLocaleString('bg')}
@@ -300,124 +389,235 @@
                                     ${Math.round(avgAllRows)}
                                 </td>
                                 <td>
-                                    
+
                                 </td>
                                 <td>
-                                    
+
                                 </td>
                             </tr>`);
 
             table.trigger('constructed.table.now-ui', [data]);
-        }
+            table.on('click',
+                'input[type="checkbox"][id^=display_]',
+                function(e) {
 
-        function initializeDateRangePicker() {
+                    var checkbox = $(e.target);
+                    var selected = checkbox.is(":checked");
+                    var row = checkbox.closest("tr");
+                    var index = row.index();
 
-            $('input[name="daterange"]').daterangepicker({
-                    "startDate": "@Model.StartDate.ToString("dd.MM.yyyy")",
-                    "endDate": "@Model.EndDate.ToString("dd.MM.yyyy")",
-                    "opens": "center",
-                    "locale": {
-                        "format": "DD.MM.YYYY",
-                        "firstDay": 1
-                    }
-                },
-                function(start, end) {
-
-                    //console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-
-                    var jsonCookieData = {};
-                    var smartUCFConfigCookieName = '@Constants.SmartUCFConfigCookieName';
-                    var cookieData = Cookies.get(smartUCFConfigCookieName);
-
-                    if (cookieData) {
-                        jsonCookieData = JSON.parse(cookieData);
+                    if (selected) {
+                        row.attr("style", "background-color: " + availableColors[index - 1]);
+                    } else {
+                        row.removeAttr("style");
                     }
 
-                    jsonCookieData.startDate = start.toDate();
-                    jsonCookieData.endDate = end.toDate();
-
-                    Cookies.set(smartUCFConfigCookieName, JSON.stringify(jsonCookieData));
-
-                    window.location.reload(true);
-
+                    table.trigger('selected.table.now-ui', [e.target, e.target.checked, index]);
                 });
         }
 
-        /*function initializeHeaderChart() {
 
-            var availableColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#3366cc", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac", "#b77322", "#16d620", "#b91383", "#f4359e", "#9c5935", "#a9c413", "#2a778d", "#668d1c", "#bea413", "#0c5922", "#743411"];
+        function initializeListsPieChart(data) {
 
-            function constructChart(data, options) {
-
-                var ctx = document.getElementById("pieChart").getContext("2d");
-                var fill = drawBlueCanvasBackground(ctx);
-
-                window.myPieChart = new Chart(ctx,
-                    {
-                        type: 'pie',
-                        data: data
-                    });
+            if (!data) {
+                throw Error("No data! Pie chart cannot initialize.");
             }
 
-            function responseToData(r) {
+            var pieChart = $("#listsUsagePieChart");
+            var pieChartLoader = $("#listsUsagePieChartLoader");
 
-                var total = r.reduce((a, { totalRowsRetrieved }) => a + totalRowsRetrieved, 0);
-                console.log(total);
+            var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
+            var selectedLists = selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
 
-                const thresholdPercent = 0.5;
+            var ctx = document.getElementById("listsUsagePieChart").getContext("2d");
+            //var fill = drawGreenCanvasBackground(ctx);
 
-                let labels = [];
-                let datasets = [];
-                let colors = [];
+            pieChartLoader.hide();
 
-                for (var i = 0; i < r.length; i++) {
-                    var percentage = r[i].totalRowsRetrieved / total * 100;
-                    if (percentage < thresholdPercent) {
-                        break;
-                    }
+            return new Chart(ctx,
+                {
+                    type: 'pie',
+                    data: formatListsPieChartData(data),
 
-                    labels.push(r[i].listName);
-                    datasets.push(r[i].totalRowsRetrieved);
-                    colors.push(availableColors[i]);
-                }
+                    options: {
+                        tooltips: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    //console.log(tooltipItem, data);
+                                    const label = data.labels[tooltipItem.index];
+                                    const val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                                    const total = data.datasets[tooltipItem.datasetIndex].data.reduce((x, y) => x + y, 0);
 
-                let displayTotal = datasets.reduce((a, b) => a + b, 0);
-                let leftOutTotal = total - displayTotal;
+                                    return '\t' + label + ' : ' + parseFloat(val / total * 100.0).toFixed(4) + "%";
+                                }
 
-                console.log(total, displayTotal, leftOutTotal);
-
-                labels.push(`< ${thresholdPercent}%`);
-                datasets.push(leftOutTotal);
-                colors.push(chartColors.grey);
-
-                let data = {
-                    datasets: [
-                        {
-                            data: datasets,
-                            backgroundColor: colors
+                            }
                         }
-                    ],
+                    },
 
-                    labels: labels
+                    plugins: [
+                        {
+                            beforeInit: function(chart, options) {
+                                chart.legend.afterFit = function() {
+                                    this.height = this.height + 30;
+                                };
+                            }
+                        }
+                    ]
+                });
+        }
+
+        function formatListsPieChartData(data) {
+
+            var selectedLists = getSelectedListsFromTable();
+
+            var labels = ["NotIncluded"];
+            var colors = [chartColors.grey];
+            var datasets = [0];
+
+
+            for (var i = 0; i < data.length; i++) {
+                var current = data[i];
+
+                if (selectedLists.includes(current.id)) {
+                    labels.push(current.listName);
+                    datasets.push(current.totalRowsRetrieved);
+                    colors.push(availableColors[i]);
+                    continue;
                 }
 
-                $("#pieChartLoader").hide();
-
-                constructChart(data);
+                datasets[0] += current.totalRowsRetrieved;
             }
 
-            $.ajax({
-                url: 'Url.Action("GetStopwatchListData")',
-                success: function(r) {
-                    console.log(r);
-                    responseToData(r);
+            return {
+                datasets: [
+                    {
+                        data: datasets,
+                        backgroundColor: colors
+                    }
+                ],
+
+                labels: labels
+            }
+        }
+
+        function updateListsPieChartData(pieChart, data) {
+            pieChart.data = formatListsPieChartData(data, getSelectedListsFromTable());
+            pieChart.update();
+        }
+
+
+        function initializeServersPieChart(data) {
+
+            if (!data) {
+                throw Error("No data! Pie chart cannot initialize.");
+            }
+
+            var pieChart = $("#serversUsagePieChart");
+            var pieChartLoader = $("#serversUsagePieChartLoader");
+
+            //var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
+            //var selectedLists = selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
+
+            var ctx = document.getElementById("serversUsagePieChart").getContext("2d");
+            //var fill = drawGreenCanvasBackground(ctx);
+
+            pieChartLoader.hide();
+
+            var formattedData = formatServersPieChart(data);
+
+            return new Chart(ctx,
+                {
+                    type: 'pie',
+                    data: formattedData,
+
+                    options: {
+                        tooltips: {
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    //console.log(tooltipItem, data);
+                                    const label = data.labels[tooltipItem.index];
+                                    const val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                                    return '\t' + label + ' : ' + parseInt(val).toLocaleString('bg');
+                                }
+
+                            }
+                        }
+                    },
+
+                    plugins: [
+                        {
+                            beforeInit: function(chart, options) {
+                                chart.legend.afterFit = function() {
+                                    this.height = this.height + 30;
+                                };
+                            }
+                        }
+                    ]
+                });
+        }
+
+        function formatServersPieChart(data) {
+
+            var labels = data[0].servers.map(x => `Сървър S${x.server}`);
+            var selectedLists = getSelectedListsFromTable();
+            var colors = availableColors.slice(0, labels.length);
+            var datasets = [];
+
+            for (var i = 0; i < data.length; i++) {
+                var current = data[i];
+
+                if (!selectedLists.includes(current.id)) {
+                    continue;
                 }
-            });
-        };*/
+
+                var dataset = {
+                    data: current.servers.map(x => x.retrieved),
+                    backgroundColor: colors
+                };
+
+                datasets.push(dataset);
+
+            }
+
+            return {
+                datasets: datasets,
+                labels: labels
+            }
+        }
+
+        function updateServersPieChartData(pieChart, data) {
+            pieChart.data = formatServersPieChart(data, getSelectedListsFromTable());
+            pieChart.update();
+        }
 
         $(document).ready(function() {
-            initializeDateRangePicker();
+            const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";
+            const modelEndDate = "@Model.EndDate.ToString("dd.MM.yyyy")";
+            initializeDateRangePicker(modelStartDate, modelEndDate);
             initializeTable();
+
+            var tableData;
+            var listsPieChart;
+            var serversPieChart;
+
+            var listUsageTable = $("#listsUsageTable");
+            listUsageTable.on("constructed.table.now-ui",
+                function(e, data) {
+                    tableData = data;
+                    listsPieChart = initializeListsPieChart(data);
+                    serversPieChart = initializeServersPieChart(data);
+                });
+
+            listUsageTable.on("selected.table.now-ui",
+                function(e, element, selected, index) {
+                    updateListsPieChartData(listsPieChart, tableData);
+                    updateServersPieChartData(serversPieChart, tableData);
+                });
+
         });
     </script>
 }
