@@ -166,5 +166,14 @@ namespace LogFilterWeb.Utility
             {"q_reg_card_clsd_unpd", "Закрити контракти за КК с непогасен дълг"},
             {"v_list_appl_POS", "Списък 'Искания за кредит'"},
         };
+
+    }
+
+    public enum SortOrder
+    {
+        Unknown,
+
+        Asc,
+        Desc,
     }
 }
