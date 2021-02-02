@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -92,6 +93,61 @@ namespace LogFilterWeb.Utility
             return default;
         }
 
+        public static void Add(this ZipArchive zip, byte[] file, string filename)
+        {
+            var zipItem = zip.CreateEntry(filename);
+            /*using (var memory = new MemoryStream(file))*/
+            using var entryStream = zipItem.Open();
+            using (var zipFileBinary = new BinaryWriter(entryStream))
+            {
+                zipFileBinary.Write(file);
+                /*memory.CopyTo(entryStream);*/
+            }
+        }
+
+        public static void Add(this ZipArchive zip, string filepath, string filename)
+        {
+            zip.Add(File.ReadAllBytes(filepath), filename);
+        }
+
+
+        public static string GetSUOSMachineName(string fullFilePath, out string config)
+        {
+            var supportedMachines = string.Join("|", Constants.SUOSMachines);
+            var targetFilePath = fullFilePath.Replace(Constants.SUOSRoot, string.Empty);
+
+            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
+
+            config = machineFinderRegex.Groups["Config"].Value;
+
+            return machineFinderRegex.Groups["Machine"].Value;
+        }
+
+        public static string GetSUOSRoute(string config = null, string machine = null, string date = null)
+        {
+            var paths = new List<string>()
+            {
+                Constants.SUOSRoot
+            };
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                paths.Add(config);
+            }
+
+            if (!string.IsNullOrEmpty(machine))
+            {
+                paths.Add(machine);
+            }
+
+            if (!string.IsNullOrEmpty(date))
+            {
+                paths.Add(date);
+            }
+
+            return Path.Combine(paths.ToArray());
+        }
+
         public static string GetSmartUCFRoute(string config = null, string machine = null, string date = null)
         {
             var paths = new List<string>()
@@ -129,41 +185,47 @@ namespace LogFilterWeb.Utility
             return machineFinderRegex.Groups["Machine"].Value;
         }
 
-        public static string GetSUOSMachineName(string fullFilePath, out string config)
+        public static string GetSmartUCFLogFilePath(string fullFilePath)
         {
-            var supportedMachines = string.Join("|", Constants.SUOSMachines);
-            var targetFilePath = fullFilePath.Replace(Constants.SUOSRoot, string.Empty);
+            var machineName = GetSmartUCFMachineName(fullFilePath, out _);
+            var fileName = new FileInfo(fullFilePath).Directory.Name + ".log";
 
-            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
-
-            config = machineFinderRegex.Groups["Config"].Value;
-
-            return machineFinderRegex.Groups["Machine"].Value;
+            return Path.Combine(Constants.SmartUCFLogsRoot, machineName, fileName);
         }
 
-        public static string GetSUOSRoute(string config = null, string machine = null, string date = null)
+        public static byte[] ZipSmartUCFCsvFiles(string[] filePaths)
         {
-            var paths = new List<string>()
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
             {
-                Constants.SUOSRoot
-            };
-
-            if (!string.IsNullOrEmpty(config))
-            {
-                paths.Add(config);
+                foreach (var filePath in filePaths)
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    var directoryName = fileInfo.Directory.Name;
+                    var machineName = GetSmartUCFMachineName(filePath, out _);
+                    zip.Add(filePath, $"{directoryName}/file_{machineName}.csv");
+                }
             }
 
-            if (!string.IsNullOrEmpty(machine))
+            return memory.ToArray();
+        }
+
+        public static byte[] ZipSmartUCFLogFiles(string[] filePaths)
+        {
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
             {
-                paths.Add(machine);
+                foreach (var filePath in filePaths)
+                {
+                    var logFilePath = GetSmartUCFLogFilePath(filePath);
+
+                    var fileInfo = new FileInfo(logFilePath);
+                    var machineName = fileInfo.Directory.Name;
+                    zip.Add(logFilePath, $"{machineName}/{fileInfo.Name}");
+                }
             }
 
-            if (!string.IsNullOrEmpty(date))
-            {
-                paths.Add(date);
-            }
-
-            return Path.Combine(paths.ToArray());
+            return memory.ToArray();
         }
     }
 }
