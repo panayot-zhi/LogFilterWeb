@@ -56,45 +56,6 @@ namespace LogFilterWeb.Utility
 
         public static readonly string[] SUOSConfigurations = { SUOSDefaultConfig, SUOSBusterConfig, SUOSOtpConfig };
 
-        public static string GetSUOSRoute(string config = null, string machine = null, string date = null)
-        {
-            var paths = new List<string>()
-            {
-                SUOSRoot
-            };
-
-            if (!string.IsNullOrEmpty(config))
-            {
-                paths.Add(config);
-            }
-
-            if (!string.IsNullOrEmpty(machine))
-            {
-                paths.Add(machine);
-            }
-
-            if (!string.IsNullOrEmpty(date))
-            {
-                paths.Add(date);
-            }
-
-            return Path.Combine(paths.ToArray());
-        }
-
-        public static string GetSUOSMachineName(string fullFilePath, out string config)
-        {
-            var supportedMachines = string.Join("|", SUOSMachines);
-            var targetFilePath = fullFilePath.Replace(SUOSRoot, string.Empty);
-
-            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
-
-            config = machineFinderRegex.Groups["Config"].Value;
-
-            return machineFinderRegex.Groups["Machine"].Value;
-        }
-
-
-
 
 
         /// <summary>
@@ -122,43 +83,6 @@ namespace LogFilterWeb.Utility
         public const string SmartUCFDefaultConfig = "default";
 
         public static readonly string[] SmartUCFConfigurations = { SmartUCFDefaultConfig };
-
-        public static string GetSmartUCFRoute(string config = null, string machine = null, string date = null)
-        {
-            var paths = new List<string>()
-            {
-                SmartUCFRoot
-            };
-
-            if (!string.IsNullOrEmpty(config))
-            {
-                paths.Add(config);
-            }
-
-            if (!string.IsNullOrEmpty(machine))
-            {
-                paths.Add(machine);
-            }
-
-            if (!string.IsNullOrEmpty(date))
-            {
-                paths.Add(date);
-            }
-
-            return Path.Combine(paths.ToArray());
-        }
-
-        public static string GetSmartUCFMachineName(string fullFilePath, out string config)
-        {
-            var supportedMachines = string.Join("|", SmartUCFMachines);
-            var targetFilePath = fullFilePath.Replace(SmartUCFRoot, string.Empty);
-
-            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
-
-            config = machineFinderRegex.Groups["Config"].Value;
-
-            return machineFinderRegex.Groups["Machine"].Value;
-        }
 
         public static readonly Dictionary<string, string> SmartUCFListDisplayName = new Dictionary<string, string>()
         {

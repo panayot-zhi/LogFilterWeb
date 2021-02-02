@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LogFilterWeb.Models.Domain;
 using Microsoft.Extensions.Caching.Memory;
@@ -37,7 +38,7 @@ namespace LogFilterWeb.Utility
             {
                 FullName = fullFileName,
                 Date = ToDateTime(directoryName),
-                ServerName = Constants.GetSmartUCFMachineName(fullFileName,out _),
+                ServerName = GetSmartUCFMachineName(fullFileName,out _),
                 Records = ReadStopWatchRecords(fullFileName).ToList()   // TODO: Remove ToList
             };
         }
@@ -49,7 +50,7 @@ namespace LogFilterWeb.Utility
 
         public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
         {
-            var machineName = Constants.GetSmartUCFMachineName(filePath, out _);
+            var machineName = GetSmartUCFMachineName(filePath, out _);
 
             return File.ReadLines(filePath)
                 .Select(line => line.Split(',')
@@ -89,6 +90,80 @@ namespace LogFilterWeb.Utility
             }
 
             return default;
+        }
+
+        public static string GetSmartUCFRoute(string config = null, string machine = null, string date = null)
+        {
+            var paths = new List<string>()
+            {
+                Constants.SmartUCFRoot
+            };
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                paths.Add(config);
+            }
+
+            if (!string.IsNullOrEmpty(machine))
+            {
+                paths.Add(machine);
+            }
+
+            if (!string.IsNullOrEmpty(date))
+            {
+                paths.Add(date);
+            }
+
+            return Path.Combine(paths.ToArray());
+        }
+
+        public static string GetSmartUCFMachineName(string fullFilePath, out string config)
+        {
+            var supportedMachines = string.Join("|", Constants.SmartUCFMachines);
+            var targetFilePath = fullFilePath.Replace(Constants.SmartUCFRoot, string.Empty);
+
+            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
+
+            config = machineFinderRegex.Groups["Config"].Value;
+
+            return machineFinderRegex.Groups["Machine"].Value;
+        }
+
+        public static string GetSUOSMachineName(string fullFilePath, out string config)
+        {
+            var supportedMachines = string.Join("|", Constants.SUOSMachines);
+            var targetFilePath = fullFilePath.Replace(Constants.SUOSRoot, string.Empty);
+
+            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
+
+            config = machineFinderRegex.Groups["Config"].Value;
+
+            return machineFinderRegex.Groups["Machine"].Value;
+        }
+
+        public static string GetSUOSRoute(string config = null, string machine = null, string date = null)
+        {
+            var paths = new List<string>()
+            {
+                Constants.SUOSRoot
+            };
+
+            if (!string.IsNullOrEmpty(config))
+            {
+                paths.Add(config);
+            }
+
+            if (!string.IsNullOrEmpty(machine))
+            {
+                paths.Add(machine);
+            }
+
+            if (!string.IsNullOrEmpty(date))
+            {
+                paths.Add(date);
+            }
+
+            return Path.Combine(paths.ToArray());
         }
     }
 }
