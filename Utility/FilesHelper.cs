@@ -24,10 +24,33 @@ namespace LogFilterWeb.Utility
             ExpirationScanFrequency = TimeSpan.FromHours(1)
         });
 
+        /// <summary>
+        /// Returns files satisfying the search pattern within a given directory.
+        /// This method uses cache to store the result file information from the combination of directory and search pattern (hashed). 
+        /// </summary>
+        /// <param name="directoryInfo">The directory to look in. The method looks in all subsequent directories.</param>
+        /// <param name="searchPattern">The search string to match against the names of files. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters, but it doesn't support regular expressions.</param>
+        /// <returns>FileInfo's enumerated, could be from cache.</returns>
         public static IEnumerable<FileInfo> GetFilesFromDirectory(DirectoryInfo directoryInfo, string searchPattern)
         {
-            return directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
-                .OrderByDescending(x => x.FullName); // always order by descending FullName
+            var key = Hash($"{directoryInfo.FullName}, {searchPattern}");
+
+            // check cache for entry
+            var cacheEntry = Cache.Get<IEnumerable<FileInfo>>(key);
+            if (cacheEntry != null && UseCache)
+            {
+                // if we're allowed to use the cache,
+                // and there is an entry retrieved
+                return cacheEntry;
+            }
+
+            var result = directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
+                .OrderByDescending(x => x.FullName).ToList(); // always order by descending FullName
+
+            // refresh the record data in cache
+            Cache.Set(key, result, TimeSpan.FromHours(1));
+
+            return result;
         }
 
         public static StopwatchFile ReadStopWatchFile(FileInfo fileInfo)
@@ -40,7 +63,7 @@ namespace LogFilterWeb.Utility
                 FullName = fullFileName,
                 Date = ToDateTime(directoryName),
                 ServerName = GetSmartUCFMachineName(fullFileName,out _),
-                Records = ReadStopWatchRecords(fullFileName).ToList()   // TODO: Remove ToList
+                Records = ReadStopWatchRecords(fullFileName)
             };
         }
 
@@ -49,11 +72,29 @@ namespace LogFilterWeb.Utility
             return ReadStopWatchRecords(fileInfo.FullName);
         }
 
+        /// <summary>
+        /// Reads a stopwatch csv file into a record set.
+        /// This method uses cache to store the result records and uses the hashed file name as key.
+        /// </summary>
+        /// <param name="filePath">The full file path to the stopwatch csv file. This will be hashed and used as a cache key.</param>
+        /// <returns>Enumerated stopwatch records, could be from cache.</returns>
         public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
         {
             var machineName = GetSmartUCFMachineName(filePath, out _);
 
-            return File.ReadLines(filePath)
+            var key = Hash(filePath);
+
+            // check cache for entry
+            var cacheEntry = Cache.Get<IEnumerable<StopwatchRecord>>(key);
+            if (cacheEntry != null && UseCache)
+            {
+                // if we're allowed to use the cache,
+                // and there is an entry retrieved
+                return cacheEntry;
+            }
+
+            // else retrieve the data again
+            var result = File.ReadLines(filePath)
                 .Select(line => line.Split(',')
                     .Select(x => x.Trim()).ToArray())
                 .Select(columns => new StopwatchRecord()
@@ -65,7 +106,26 @@ namespace LogFilterWeb.Utility
                     NumberOfRows = int.Parse(columns[3]),
                     RetrieveMilliseconds = int.Parse(columns[4])
 
-                });
+                }).ToList();
+
+            // refresh the record data in cache
+            Cache.Set(key, result, TimeSpan.FromHours(1));
+
+            return result;
+        }
+
+        private static string Hash(string input)
+        {
+            using (var md5Hash = MD5.Create())
+            {
+                byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+                StringBuilder sBuilder = new StringBuilder();
+                for (int i = 0; i < data.Length; i++)
+                {
+                    sBuilder.Append(data[i].ToString("x2"));
+                }
+                return sBuilder.ToString();
+            }
         }
 
         public static DateTime ToDateTime(string target)
