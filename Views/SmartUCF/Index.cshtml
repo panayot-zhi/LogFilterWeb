@@ -76,15 +76,32 @@
                     </p>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="monitoredServersListLink">
-                    @foreach (var server in Constants.SmartUCFMachines)
+
+                    <h6 class="dropdown-header"><a id="display_old_servers" href="#">Old servers</a></h6>
+
+                    @foreach (var server in Constants.SmartUCFOldMachines)
                     {
                         if (Model.MonitoredServers.Contains(server))
                         {
-                            <a class="dropdown-item active" id="display_server_@server" href="javascript:void(0);">@($"Сървър {server}")</a>
+                            <a class="dropdown-item active" id="display_server_@server" href="#">@($"Server {server}")</a>
                         }
                         else
                         {
-                            <a class="dropdown-item" id="display_server_@server" href="javascript:void(0);">@($"Сървър {server}")</a>
+                            <a class="dropdown-item" id="display_server_@server" href="#">@($"Server {server}")</a>
+                        }
+                    }
+
+                    <h6 class="dropdown-header"><a id="display_new_servers" href="#">New Servers</a></h6>
+                    
+                    @foreach (var server in Constants.SmartUCFNewMachines)
+                    {
+                        if (Model.MonitoredServers.Contains(server))
+                        {
+                            <a class="dropdown-item active" id="display_server_@server" href="#">@($"Server {server}")</a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item" id="display_server_@server" href="#">@($"Server {server}")</a>
                         }
                     }
                 </div>
@@ -339,8 +356,60 @@
 
         function initializeCurrentServersPicker() {
             $('#monitoredServersList').on('click',
-                ".dropdown-item",
+                "#display_old_servers",
                 function(e) {
+                    e.preventDefault();
+
+                    var serverNames = @Json.Serialize(Constants.SmartUCFOldMachines);
+
+                    var jsonCookieData = {};
+                    var cookieData = Cookies.get(smartUCFCookieName);
+
+                    if (cookieData) {
+                        jsonCookieData = JSON.parse(cookieData);
+                    }
+
+                    if (!jsonCookieData.monitoredServers) {
+                        jsonCookieData.monitoredServers = [];
+                    }
+
+                    jsonCookieData.monitoredServers = serverNames;
+
+                    Cookies.set(smartUCFCookieName, JSON.stringify(jsonCookieData));
+
+                    window.location.reload(true);
+                });
+
+            $('#monitoredServersList').on('click',
+                "#display_new_servers",
+                function (e) {
+                    e.preventDefault();
+
+                    var serverNames = @Json.Serialize(Constants.SmartUCFNewMachines);
+
+                    var jsonCookieData = {};
+                    var cookieData = Cookies.get(smartUCFCookieName);
+
+                    if (cookieData) {
+                        jsonCookieData = JSON.parse(cookieData);
+                    }
+
+                    if (!jsonCookieData.monitoredServers) {
+                        jsonCookieData.monitoredServers = [];
+                    }
+
+                    jsonCookieData.monitoredServers = serverNames;
+
+                    Cookies.set(smartUCFCookieName, JSON.stringify(jsonCookieData));
+
+                    window.location.reload(true);
+                });
+
+            $('#monitoredServersList').on('click',
+                ".dropdown-item",
+                function (e) {
+                    e.preventDefault();
+
                     var serverName = this.id.replace("display_server_", "");
 
                     var jsonCookieData = {};

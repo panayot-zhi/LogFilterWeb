@@ -37,6 +37,11 @@
 .card-footer .stats-info {
     color: #9A9A9A;
 }
+
+.navbar .dropdown-header a#display_new_servers,
+.navbar .dropdown-header a#display_old_servers {
+    color: #888;
+}
 /* EOF NowUI Overrides */
 
 /* Rect Spinner */
