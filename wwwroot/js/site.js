@@ -2,19 +2,21 @@
 
 const availableColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#3366cc", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac", "#b77322", "#16d620", "#b91383", "#f4359e", "#9c5935", "#a9c413", "#2a778d", "#668d1c", "#bea413", "#0c5922", "#743411"];
 
+const namedColors = {
+    white: "#FFFFFF",
+    darkblue: "#1e3d60",
+    blue: "rgb(54, 162, 235)",
+    green: "rgb(75, 192, 192)",
+    grey: "rgb(201, 203, 207)",
+    orange: "rgb(255, 159, 64)",
+    purple: "rgb(153, 102, 255)",
+    red: "rgb(255, 99, 132)",
+    yellow: "rgb(255, 205, 86)"
+}
+
 // TODO: Color shenanigans, remove
 
-const chartColors = {
-  white: "#FFFFFF",
-  darkblue: "#1e3d60",
-  blue: "rgb(54, 162, 235)",
-  green: "rgb(75, 192, 192)",
-  grey: "rgb(201, 203, 207)",
-  orange: "rgb(255, 159, 64)",
-  purple: "rgb(153, 102, 255)",
-  red: "rgb(255, 99, 132)",
-  yellow: "rgb(255, 205, 86)"
-}
+
 
 function hex(c) {
     var s = "0123456789abcdef";
