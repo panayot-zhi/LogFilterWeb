@@ -67,11 +67,10 @@ namespace LogFilterWeb.Utility
         /// <summary>
         /// "06", "07", "08", "09"
         /// </summary>
-        public static readonly string[] SmartUCFMachines =
-        {
-            "01", "02", "04", "05", // TODO: Remove this after testing!
-            "06", "07", "08", "09"
-        };
+        public static readonly string[] SmartUCFOldMachines = { "01", "02", "04", "05" };
+        public static readonly string[] SmartUCFNewMachines = { "06", "07", "08", "09" };
+
+        public static string[] SmartUCFMachines => SmartUCFOldMachines.Concat(SmartUCFNewMachines).ToArray();
 
         /// <summary>
         /// default
