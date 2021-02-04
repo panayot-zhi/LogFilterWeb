@@ -22,6 +22,6 @@ namespace LogFilterWeb.Utility
             set => _endDate = value;
         }
 
-        public bool SingleDate => StartDate.Equals(EndDate);
+        public bool SingleDate => StartDate.Date.Equals(EndDate.Date);
     }
 }
