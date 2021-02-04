@@ -11,6 +11,12 @@ namespace LogFilterWeb.Utility
 {
     public static class Extensions
     {
+        public static IEnumerable<DateTimeOffset> EachDay(DateTimeOffset start, DateTimeOffset end)
+        {
+            for (var day = start.Date; day.Date <= end.Date; day = day.AddDays(1))
+                yield return day;
+        }
+
         public static T ReadCookie<T>(this ControllerBase controller, string key) where T : new()
         {
             var cookieData = controller.HttpContext.Request.Cookies[key];
