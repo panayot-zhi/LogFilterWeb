@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -6,6 +7,7 @@ using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Services;
 using LogFilterWeb.Utility;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace LogFilterWeb.Controllers.Api
 {
@@ -83,55 +85,77 @@ namespace LogFilterWeb.Controllers.Api
             };
         }
 
-        /*[HttpGet]
+        [HttpGet]
         [Route("api/smartUCF/stopwatchServerDataByDay")]
-        public dynamic GetStopwatchServerDataByDay(string serverName)
+        public dynamic GetStopwatchServerDataByDay(string listName)
         {
-            var cookieData = this.ReadCookie<DateRange>(Constants.SmartUCFConfigCookieName);
-
-            dynamic meta = new ExpandoObject();
-            
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData.StartDate.Date, cookieData.EndDate.Date, ref meta);
-            var query = data.AsParallel();
-
-            if (!string.IsNullOrEmpty(serverName))
+            if (string.IsNullOrWhiteSpace(listName))
             {
-                query = query.Where(x => x.MachineName == serverName);
+                throw new ArgumentNullException(nameof(listName));
             }
 
-            return query.GroupBy(x => x.MachineName,
-                (machineName, groupByMachine) =>
-                {
-                    var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
 
-                    return new
+            dynamic meta = new ExpandoObject();
+
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var query = data.AsParallel();
+
+            if (!string.IsNullOrEmpty(listName))
+            {
+                query = query.Where(x => x.ListName == listName);
+            }
+
+            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machine, groupByMachine) =>
                     {
-                        Server = machineName,
-                        Retrieved = groupByMachineArray.Sum(x => x.NumberOfRows),
-                        Records = groupByMachineArray.GroupBy(x => x.Date, 
-                            (date, groupByDate) =>
+                        var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            var dailyRecords = groupByMachineArray.Where(x => x.Date == day).ToArray();
+
+                            if (dailyRecords.Length > 0)
                             {
-                                var groupByDateArray = groupByDate as StopwatchRecord[] ?? groupByDate.ToArray();
-
-                                return new
+                                result.Add(new
                                 {
-                                    Date = date,
-                                    Retrieved = groupByDateArray.Sum(x => x.NumberOfRows),
-                                    Lists = groupByDateArray.GroupBy(x => x.ListName,
-                                        (list, groupByList) =>
-                                        {
-                                            return new
-                                            {
-                                                List = list, 
-                                                Retrieved = groupByList.Sum(x => x.NumberOfRows)
-                                            };
+                                    Date = day,
+                                    TotalRecords = dailyRecords.Length,
+                                    TotalRowsRetrieved = dailyRecords.Sum(x => x.NumberOfRows),
+                                    MaxRowsRetrieved = dailyRecords.Max(x => x.NumberOfRows),
+                                    AvgRowsRetrieved = dailyRecords.Average(x => x.NumberOfRows),
+                                    MaxRetrieveTime = dailyRecords.Max(x => x.RetrieveMilliseconds),
+                                    AvgRetrieveTime = dailyRecords.Average(x => x.RetrieveMilliseconds),
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = 0,
+                                    TotalRowsRetrieved = 0,
+                                    MaxRowsRetrieved = 0,
+                                    MaxRetrieveTime = 0,
+                                    AvgRetrieveTime = 0
+                                });
+                            }
+                        }
 
-                                        }).OrderByDescending(x => x.Retrieved)
-                                };
+                        return new
+                        {
+                            Name = machine,
+                            Records = result
+                        };
 
-                            }).OrderBy(x => x.Date)
-                    };
-                });
-        }*/
+                    }).OrderByDescending(x => x.Name)
+            };
+        }
     }
 }
