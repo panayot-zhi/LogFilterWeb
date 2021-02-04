@@ -92,7 +92,7 @@
                     }
 
                     <h6 class="dropdown-header"><a id="display_new_servers" href="#">New Servers</a></h6>
-                    
+
                     @foreach (var server in Constants.SmartUCFNewMachines)
                     {
                         if (Model.MonitoredServers.Contains(server))
@@ -104,6 +104,26 @@
                             <a class="dropdown-item" id="display_server_@server" href="#">@($"Server {server}")</a>
                         }
                     }
+                </div>
+            </li>
+            
+            <li id="headerChartOptions" class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="headerChartOptionsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="now-ui-icons media-2_sound-wave"></i>
+                    <p>
+                        <span class="d-lg-none d-md-block">Chart Options</span>
+                    </p>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="headerChartOptionsLink">
+                    <h6 class="dropdown-header">Display property</h6>
+                    <a class="dropdown-item" id="display_property_totalRowsRetrieved" href="#">totalRowsRetrieved</a>
+                    <a class="dropdown-item" id="display_property_totalRecords" href="#">totalRecords</a>
+                    <a class="dropdown-item" id="display_property_avgRowsRetrieved" href="#">avgRowsRetrieved</a>
+                    <a class="dropdown-item" id="display_property_avgRetrieveTime" href="#">avgRetrieveTime</a>
+                    <a class="dropdown-item" id="display_property_maxRetrieveTime" href="#">maxRetrieveTime</a>
+                    <a class="dropdown-item" id="display_property_maxRowsRetrieved" href="#">maxRowsRetrieved</a>
+                    <h6 class="dropdown-header">Other</h6>
+                    <a class="dropdown-item" id="headerChartRefresh" href="#">refresh</a>
                 </div>
             </li>
 
@@ -121,19 +141,29 @@
 
 }
 
-@*<div class="panel-header panel-header-lg">
-    <div id="headerDashboardChartLoader">
-        <div class="horizontalCirclesLoader">Зареждане...</div>
+@if (Model.SingleDate)
+{
+    <div class="panel-header">
+        <div class="header text-center">
+            <h2 class="title">Server data by Day</h2>
+            <p class="category">You have selected a single date for a monitor period.<br>A historical graphic will not be constructed.</p>
+        </div>
     </div>
-    <canvas id="headerDashboardChart"></canvas>
-</div>*@
-
-<div class="panel-header">
-    <div class="header text-center">
-        <h2 class="title">SmartUCF</h2>
-        <p class="category">TODO</p>
-    </div>
-</div>
+}
+else
+{
+    <div class="panel-header panel-header-lg">
+            <div id="serverDailyUsageHeaderChartLoader">
+                <div class="hrc-spinner text-white">
+                    <div class="bounce1 bg-white"></div>
+                    <div class="bounce2 bg-white"></div>
+                    <div class="bounce3 bg-white"></div>
+                    Loading
+                </div>
+            </div>
+            <canvas id="serverDailyUsageHeaderChart"></canvas>
+        </div>
+}
 
 <div class="content">
     <div class="row">
@@ -149,11 +179,11 @@
                         </button>
                         <div class="dropdown-menu dropdown-menu-right text-right">
                             <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
-                            
+
                             <form id="getCsvZip" asp-action="GetCsvZip" target="_blank">
                                 <input class="dropdown-item" type="submit" value="Get Csv Zip" />
                             </form>
-                            
+
                             <form id="getLogsZip" asp-action="GetLogsZip" target="_blank">
                                 <input class="dropdown-item" type="submit" value="Get Logs Zip" />
                             </form>
@@ -204,18 +234,18 @@
                                 </tr>
                             </thead>
                             <tbody class="text-right">
-                            <tr id="listsUsageTableLoader">
-                                <td colspan="8">
-                                    <div class="rect-spinner">
-                                        <div class="rect1 bg-primary"></div>
-                                        <div class="rect2 bg-primary"></div>
-                                        <div class="rect3 bg-primary"></div>
-                                        <div class="rect4 bg-primary "></div>
-                                        <div class="rect5 bg-primary"></div>
-                                        Loading
-                                    </div>
-                                </td>
-                            </tr>
+                                <tr id="listsUsageTableLoader">
+                                    <td colspan="8">
+                                        <div class="rect-spinner">
+                                            <div class="rect1 bg-primary"></div>
+                                            <div class="rect2 bg-primary"></div>
+                                            <div class="rect3 bg-primary"></div>
+                                            <div class="rect4 bg-primary "></div>
+                                            <div class="rect5 bg-primary"></div>
+                                            Loading
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -226,7 +256,7 @@
                         <div class="dropup">
                             <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
                                 <i class="now-ui-icons travel_info"></i>
-                            </button> 
+                            </button>
                             <span class="stats-info"></span>
                             <div class="dropdown-menu dropdown-menu-left">
                             </div>
@@ -257,10 +287,7 @@
                 </div>
                 <div class="card-body">
                     <div id="listsUsagePieChartLoader">
-                        <div class="spinner">
-                            <div class="double-bounce1 bg-primary"></div>
-                            <div class="double-bounce2 bg-primary"></div>
-                        </div>
+                        <div class="pulse-spinner bg-primary"></div>
                     </div>
                     <div class="chart-area" style="height: auto;">
                         <canvas id="listsUsagePieChart"></canvas>
@@ -279,20 +306,20 @@
                     <h4 class="card-title">Servers usage proportion</h4>
                     <p class="category">A proportion of the servers utilization given the chosen lists from the monitored period</p>
                     @*<div class="dropdown">
-                        <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
-                            <i class="now-ui-icons loader_gear"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
-                            <a class="dropdown-item" href="#" target="_blank">Get Csv Zip </a>
-                            <a class="dropdown-item" href="#" target="_blank">Get Logs Zip</a>
-                            <a class="dropdown-item text-danger" href="#">Remove Data</a>
-                        </div>
-                    </div>*@
+                            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
+                                <i class="now-ui-icons loader_gear"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
+                                <a class="dropdown-item" href="#" target="_blank">Get Csv Zip </a>
+                                <a class="dropdown-item" href="#" target="_blank">Get Logs Zip</a>
+                                <a class="dropdown-item text-danger" href="#">Remove Data</a>
+                            </div>
+                        </div>*@
                 </div>
                 <div class="card-body">
                     <div id="serversUsagePieChartLoader">
-                        <div class="spinner">
+                        <div class="db-spinner">
                             <div class="double-bounce1 bg-primary"></div>
                             <div class="double-bounce2 bg-primary"></div>
                         </div>
@@ -310,7 +337,7 @@
 
         </div>
 
-        </div>
+    </div>
 </div>
 
 @section footer {
@@ -382,7 +409,7 @@
 
             $('#monitoredServersList').on('click',
                 "#display_new_servers",
-                function (e) {
+                function(e) {
                     e.preventDefault();
 
                     var serverNames = @Json.Serialize(Constants.SmartUCFNewMachines);
@@ -407,7 +434,7 @@
 
             $('#monitoredServersList').on('click',
                 ".dropdown-item",
-                function (e) {
+                function(e) {
                     e.preventDefault();
 
                     var serverName = this.id.replace("display_server_", "");
@@ -476,6 +503,8 @@
                 loaderRow.show();
                 loaderRow.nextAll().hide();
 
+                $("#listsUsageTableCard > div.card-header > div > button").attr("disabled", "disabled");
+
                 $.ajax({
                     url: '@Url.Action("GetStopwatchListData")',
                     success: function(r) {
@@ -497,6 +526,8 @@
 
             loaderRow.hide();
             loaderRow.nextAll().remove();
+
+            $("#listsUsageTableCard > div.card-header > div > button").removeAttr("disabled");
 
             for (var i = 0; i < data.length; i++) {
                 var listData = data[i];
@@ -585,7 +616,7 @@
                 var selectedLists = getSelectedListsFromTable();
 
                 var labels = ["NotIncluded"];
-                var colors = [chartColors.grey];
+                var colors = [namedColors.grey];
                 var datasets = [0];
 
 
@@ -704,15 +735,15 @@
                 }
             }
 
-            function updateInfo(data) {
+            function updateInfo(info) {
 
                 var totalRowsDisplayed = 0;
-                var datasets = data.datasets;
+                var datasets = info.datasets;
                 for (var i = 0; i < datasets.length; i++) {
                     totalRowsDisplayed += datasets[i].data.reduce((a, b) => a + b);
                 }
 
-                $("#serversUsagePieChartCard .card-footer .stats-info").text(`Displaying data from ${data.datasets.length} lists. Total of ${nFormatter(totalRowsDisplayed, 2)} rows.`);
+                $("#serversUsagePieChartCard .card-footer .stats-info").text(`Displaying data from ${info.datasets.length} lists. Total of ${nFormatter(totalRowsDisplayed, 2)} rows.`);
             }
 
             if (!data) {
@@ -769,6 +800,191 @@
                 });
         }
 
+        var serverHeaderChart;
+        function updateServersHeaderChart(data, displayProperty) {
+
+            var headerChart = $("#serverDailyUsageHeaderChart");
+            var headerChartLoader = $("#serverDailyUsageHeaderChartLoader");
+            var ctx = document.getElementById("serverDailyUsageHeaderChart").getContext("2d");
+            var fill = drawBlueCanvasBackground(ctx);
+            
+            if (!displayProperty) {
+                displayProperty = "totalRowsRetrieved";
+            }
+
+            function formatData(raw) {
+                console.log(raw);
+
+                if (!raw.length) {
+                    console.warn("No data!");
+                    return null;
+                }
+
+                var labels = raw[0].records.map(x => moment(x.date).format('MMM DD'));
+                var colors = raw.map((x) => availableColors[smartUCFServers.indexOf(x.name)]);
+                var datasets = [];
+
+                for (var i = 0; i < raw.length; i++) {
+
+                    var server = raw[i];
+                    
+                    datasets.push({
+                        label: "Server S" + server.name,
+                        borderColor: colors[i],
+                        pointBorderColor: namedColors.white,
+                        pointBackgroundColor: colors[i],
+                        pointHoverBackgroundColor: colors[i],
+                        pointHoverBorderColor: namedColors.white,
+                        pointBorderWidth: 1,
+                        pointHoverRadius: 7,
+                        pointHoverBorderWidth: 2,
+                        pointRadius: 5,
+                        fill: true,
+                        backgroundColor: fill,
+                        borderWidth: 2,
+                        data: server.records.map((x) => x[displayProperty])
+                    });
+                }
+
+                return {
+                    labels: labels,
+                    datasets: datasets
+                }
+            }
+
+            function updateInfo(info) {
+                //console.log(info);
+                // TODO: Update navbar-brand with the current list display
+                // TODO: Update navbar options with datasets
+            }
+
+            if (!data) {
+
+                // TODO: A mechanism to skip retrieval if the list is the same
+
+                // retrieve
+                headerChart.hide();
+                headerChartLoader.show();
+
+                /*var selectedLists = getSelectedListsFromTable();
+                if (!selectedLists.length) {
+                    return null;
+                }*/
+
+                //var listName = selectedLists[0];
+
+                $.ajax({
+                    url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + getSelectedListsFromTable()[0], // undefined?
+                    success: function(r) {
+                        updateServersHeaderChart(r.results, displayProperty);
+                        updateInfo(r.meta);
+                    }
+                });
+
+                return;
+            }
+
+            headerChart.show();
+            headerChartLoader.hide();
+
+            $("#headerChartOptions a[id^=display_property_]").removeClass('active');
+            $(`#display_property_${displayProperty}`).addClass('active');
+
+            // update
+            if (serverHeaderChart) {
+                var newData = formatData(data);
+                serverHeaderChart.data = newData;
+                serverHeaderChart.update();
+                return;
+            }
+
+            // initialize
+            var initialData = formatData(data);
+            serverHeaderChart = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: initialData,
+
+                    options: {
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 60,
+                                top: 0,
+                                bottom: 0
+                            }
+                        },
+                        maintainAspectRatio: false,
+                        tooltips: {
+                            backgroundColor: '#fff',
+                            titleFontColor: '#333',
+                            bodyFontColor: '#666',
+                            bodySpacing: 4,
+                            xPadding: 12,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label;
+                                    var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                                    return '\t' + label + ' : ' + parseFloat(val).toLocaleString('bg');
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                fontColor: '#fff'
+                            },
+                            position: "bottom",
+                            fillStyle: "#FFF",
+                            display: true
+                        },
+                        scales: {
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold",
+                                        beginAtZero: true,
+                                        maxTicksLimit: 5,
+                                        padding: 10,
+                                        callback: function(value, index, values) {
+                                            return nFormatter(value);
+                                        }
+                                    },
+                                    gridLines: {
+                                        drawTicks: true,
+                                        drawBorder: false,
+                                        display: true,
+                                        color: "rgba(255,255,255,0.1)",
+                                        zeroLineColor: "transparent"
+                                    }
+
+                                }
+                            ],
+                            xAxes: [
+                                {
+                                    gridLines: {
+                                        zeroLineColor: "transparent",
+                                        display: false
+
+                                    },
+                                    ticks: {
+                                        padding: 10,
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                });
+
+        }
+
         $(document).ready(function() {
             const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";
             const modelEndDate = "@Model.EndDate.ToString("dd.MM.yyyy")";
@@ -786,12 +1002,14 @@
                     tableData = data;
                     listsPieChart = updateListsPieChart(data);
                     serversPieChart = updateServersPieChart(data);
+                    updateServersHeaderChart();
                 });
 
             listUsageTable.on("updated.table.now-ui",
                 function() {
                     updateListsPieChart(tableData, listsPieChart);
                     updateServersPieChart(tableData, serversPieChart);
+                    updateServersHeaderChart();
                 });
 
             listUsageTable.on('click',
@@ -817,6 +1035,10 @@
                 function(e) {
                     e.preventDefault();
 
+                    if (!tableData) {
+                        return;
+                    }
+
                     var anchor = $(e.target);
                     var descendingOrder = anchor.hasClass("desc");
                     var propertyName = anchor.attr("id").replace("sort_by_", "");
@@ -841,6 +1063,23 @@
 
                     updateListsUsageTable(tableData);
                     listUsageTable.trigger('updated.table.now-ui', [e.target, descendingOrder]);
+                });
+
+            $("#headerChartOptions a.dropdown-item").on('click',
+                function(e) {
+                    e.preventDefault();
+
+                    var displayProperty = this.id.replace("display_property_", "");
+                    updateServersHeaderChart(null, displayProperty);
+
+                });
+
+            $("#headerChartRefresh").on('click',
+                function(e) {
+                    e.preventDefault();
+
+                    serverHeaderChart = null;
+                    updateServersHeaderChart();
                 });
 
             $("#refreshListsUsageTable").on('click',
