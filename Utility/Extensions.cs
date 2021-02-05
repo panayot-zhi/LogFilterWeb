@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
@@ -42,6 +41,23 @@ namespace LogFilterWeb.Utility
                 controller.HttpContext.Response.Cookies.Delete(key);
                 return new T();
             }
+        }
+
+        public static void Add(this ZipArchive zip, byte[] file, string filename)
+        {
+            var zipItem = zip.CreateEntry(filename);
+            /*using (var memory = new MemoryStream(file))*/
+            using var entryStream = zipItem.Open();
+            using (var zipFileBinary = new BinaryWriter(entryStream))
+            {
+                zipFileBinary.Write(file);
+                /*memory.CopyTo(entryStream);*/
+            }
+        }
+
+        public static void Add(this ZipArchive zip, string filepath, string filename)
+        {
+            zip.Add(File.ReadAllBytes(filepath), filename);
         }
     }
 

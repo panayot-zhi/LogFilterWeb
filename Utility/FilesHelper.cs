@@ -153,23 +153,6 @@ namespace LogFilterWeb.Utility
             return default;
         }
 
-        public static void Add(this ZipArchive zip, byte[] file, string filename)
-        {
-            var zipItem = zip.CreateEntry(filename);
-            /*using (var memory = new MemoryStream(file))*/
-            using var entryStream = zipItem.Open();
-            using (var zipFileBinary = new BinaryWriter(entryStream))
-            {
-                zipFileBinary.Write(file);
-                /*memory.CopyTo(entryStream);*/
-            }
-        }
-
-        public static void Add(this ZipArchive zip, string filepath, string filename)
-        {
-            zip.Add(File.ReadAllBytes(filepath), filename);
-        }
-
 
         public static string GetSUOSMachineName(string fullFilePath, out string config)
         {
