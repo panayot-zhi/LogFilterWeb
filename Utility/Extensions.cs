@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 
 namespace LogFilterWeb.Utility
@@ -40,6 +42,26 @@ namespace LogFilterWeb.Utility
                 controller.HttpContext.Response.Cookies.Delete(key);
                 return new T();
             }
+        }
+    }
+
+    public class CamelCaseParameterTransformer : IOutboundParameterTransformer
+    {
+        public string TransformOutbound(object value)
+        {
+            // PascalCase -> camelCase
+            var source = value as string;
+            if (source == null)
+            {
+                return null;
+            }
+
+            if (source.Length == 1)
+            {
+                return source[0].ToString().ToLower();
+            }
+
+            return source[0].ToString().ToLower() + source.Substring(1);
         }
     }
 
