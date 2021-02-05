@@ -12,9 +12,12 @@ namespace LogFilterWeb.Services
     {
         public static IEnumerable<StopwatchRecord> GetStopwatchRecordsForRange(SmartUCF cookieData, ref dynamic meta)
         {
+            meta.begin = DateTime.Now;
+
             var activeServers = cookieData.MonitoredServers;
             var from = cookieData.StartDate.Date;
             var to = cookieData.EndDate.Date;
+
 
             var smartUCFRoute = FilesHelper.GetSmartUCFRoute(Constants.SmartUCFDefaultConfig);
             var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv");
@@ -26,6 +29,7 @@ namespace LogFilterWeb.Services
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
 
+            // NOTE: Do try to avoid this
             var filesInRangeArray = filesInRange as FileInfo[] ?? filesInRange.ToArray();
             var stopwatchRecords = filesInRangeArray.Select(FilesHelper.ReadStopWatchRecords)
                 .SelectMany(x => x);
@@ -41,24 +45,10 @@ namespace LogFilterWeb.Services
             meta.files = filesInRangeArray.Select(x => x.FullName);
             meta.to = to;
 
+            meta.end = DateTime.Now;
+            meta.elapsed = meta.end - meta.begin;
+
             return stopwatchRecords;
         }
-
-        /*
-        public static IEnumerable<StopwatchFile> GetStopwatchFilesForRange(DateTime from, DateTime to)
-        {
-            var smartUCFRoute = Constants.GetSmartUCFRoute(Constants.SmartUCFDefaultConfig);
-            var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv");
-
-            var filesInRange = csvFiles.Where(x =>
-                FilesHelper.ToDateTime(x.Directory.Name) >= from.Date &&
-                FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
-            );
-
-            var stopwatchFiles = filesInRange.Select(FilesHelper.ReadStopWatchFile);
-
-            return stopwatchFiles;
-        }
-    */
     }
 }
