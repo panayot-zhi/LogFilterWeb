@@ -7,7 +7,6 @@ using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Services;
 using LogFilterWeb.Utility;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace LogFilterWeb.Controllers.Api
 {
@@ -104,15 +103,15 @@ namespace LogFilterWeb.Controllers.Api
             return new
             {
                 Meta = meta,
-                Results = query.GroupBy(keySelector: x => x.MachineName,
-                    resultSelector: (machine, groupByMachine) =>
+                Results = query.GroupBy(keySelector: x => x.ListName,
+                    resultSelector: (list, groupByList) =>
                     {
-                        var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+                        var groupByListArray = groupByList as StopwatchRecord[] ?? groupByList.ToArray();
 
                         var result = new List<dynamic>();
                         foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
                         {
-                            var dailyRecords = groupByMachineArray.Where(x => x.Date == day).ToArray();
+                            var dailyRecords = groupByListArray.Where(x => x.Date == day).ToArray();
 
                             if (dailyRecords.Length > 0)
                             {
@@ -143,14 +142,21 @@ namespace LogFilterWeb.Controllers.Api
 
                         return new
                         {
-                            Name = machine,
+                            Id = list,
+                            Name = Constants.SmartUCFListDisplayName[list],
+
+                            TotalRowsRetrieved = groupByListArray.Sum(x => x.NumberOfRows),
+                            MaxRowsRetrieved = groupByListArray.Max(x => x.NumberOfRows),
+                            AvgRowsRetrieved = groupByListArray.Average(x => x.NumberOfRows),
+                            MaxRetrieveTime = groupByListArray.Max(x => x.RetrieveMilliseconds),
+                            AvgRetrieveTime = groupByListArray.Average(x => x.RetrieveMilliseconds),
+
                             Records = result
                         };
 
                     }).OrderByDescending(x => x.Name)
             };
         }
-
 
         [HttpGet]
         public dynamic GetStopwatchServerDataByDay(string listName)
@@ -165,6 +171,9 @@ namespace LogFilterWeb.Controllers.Api
             var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
             var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
             var query = data.AsParallel();
+
+            meta.listName = listName;
+            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
 
             query = query.Where(x => x.ListName == listName);
             query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
