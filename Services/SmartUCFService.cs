@@ -12,7 +12,7 @@ namespace LogFilterWeb.Services
     {
         public static IEnumerable<StopwatchRecord> GetStopwatchRecordsForRange(SmartUCF cookieData, ref dynamic meta)
         {
-            meta.begin = DateTime.Now;
+            meta.begin = DateTime.Now.ToLocalTime();
 
             var activeServers = cookieData.MonitoredServers;
             var from = cookieData.StartDate.Date;
@@ -45,8 +45,8 @@ namespace LogFilterWeb.Services
             meta.files = filesInRangeArray.Select(x => x.FullName);
             meta.to = to;
 
-            meta.end = DateTime.Now;
-            meta.elapsed = meta.end - meta.begin;
+            meta.end = DateTime.Now.ToLocalTime();
+            meta.elapsed = (meta.end - meta.begin).ToString("c");
 
             return stopwatchRecords;
         }
