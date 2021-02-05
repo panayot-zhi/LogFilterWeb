@@ -63,7 +63,7 @@ namespace LogFilterWeb
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "LogFilterWebApi v1");
+                c.SwaggerEndpoint("v1/swagger.json", "LogFilterWebApi v1");
             });
 
             app.UseEndpoints(endpoints =>

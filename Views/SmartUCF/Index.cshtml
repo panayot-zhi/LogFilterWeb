@@ -178,7 +178,7 @@ else
                             <i class="now-ui-icons loader_gear"></i>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right text-right">
-                            <a class="dropdown-item" href="@Url.Action("GetStopwatchListData")" target="_blank">Get JSON</a>
+                            <a class="dropdown-item" href="@Url.Action("GetStopwatchListsData")" target="_blank">Get JSON</a>
 
                             <form id="getCsvZip" asp-action="GetCsvZip" target="_blank">
                                 <input class="dropdown-item" type="submit" value="Get Csv Zip" />
@@ -506,7 +506,7 @@ else
                 $("#listsUsageTableCard > div.card-header > div > button").attr("disabled", "disabled");
 
                 $.ajax({
-                    url: '@Url.Action("GetStopwatchListData")',
+                    url: '@Url.Action("GetStopwatchListsData")',
                     success: function(r) {
                         //console.log(r);
                         updateListsUsageTable(r.results);

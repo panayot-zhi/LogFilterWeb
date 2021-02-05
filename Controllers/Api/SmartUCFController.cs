@@ -12,16 +12,15 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace LogFilterWeb.Controllers.Api
 {
     [ApiController]
+    [Route("api/smartUCF/[action]")]
     public class SmartUCFController : ControllerBase
     {
         [HttpGet]
-        [Route("api/smartUCF/stopwatchListData")]
-        public dynamic GetStopwatchListData(string listName)
+        public dynamic GetStopwatchListsData(string listName)
         {
-            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-
             dynamic meta = new ExpandoObject();
-
+            
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
             var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
             var query = data.AsParallel();
 
@@ -86,7 +85,74 @@ namespace LogFilterWeb.Controllers.Api
         }
 
         [HttpGet]
-        [Route("api/smartUCF/stopwatchServerDataByDay")]
+        public dynamic GetStopwatchListDataByDay(string listName)
+        {
+            if (string.IsNullOrWhiteSpace(listName))
+            {
+                throw new ArgumentNullException(nameof(listName));
+            }
+
+            dynamic meta = new ExpandoObject();
+            
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var query = data.AsParallel();
+
+            query = query.Where(x => x.ListName == listName);
+            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machine, groupByMachine) =>
+                    {
+                        var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            var dailyRecords = groupByMachineArray.Where(x => x.Date == day).ToArray();
+
+                            if (dailyRecords.Length > 0)
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = dailyRecords.Length,
+                                    TotalRowsRetrieved = dailyRecords.Sum(x => x.NumberOfRows),
+                                    MaxRowsRetrieved = dailyRecords.Max(x => x.NumberOfRows),
+                                    AvgRowsRetrieved = dailyRecords.Average(x => x.NumberOfRows),
+                                    MaxRetrieveTime = dailyRecords.Max(x => x.RetrieveMilliseconds),
+                                    AvgRetrieveTime = dailyRecords.Average(x => x.RetrieveMilliseconds),
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = 0,
+                                    TotalRowsRetrieved = 0,
+                                    MaxRowsRetrieved = 0,
+                                    MaxRetrieveTime = 0,
+                                    AvgRetrieveTime = 0
+                                });
+                            }
+                        }
+
+                        return new
+                        {
+                            Name = machine,
+                            Records = result
+                        };
+
+                    }).OrderByDescending(x => x.Name)
+            };
+        }
+
+
+        [HttpGet]
         public dynamic GetStopwatchServerDataByDay(string listName)
         {
             if (string.IsNullOrWhiteSpace(listName))
@@ -94,18 +160,13 @@ namespace LogFilterWeb.Controllers.Api
                 throw new ArgumentNullException(nameof(listName));
             }
 
-            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-
             dynamic meta = new ExpandoObject();
 
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
             var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
             var query = data.AsParallel();
 
-            if (!string.IsNullOrEmpty(listName))
-            {
-                query = query.Where(x => x.ListName == listName);
-            }
-
+            query = query.Where(x => x.ListName == listName);
             query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
