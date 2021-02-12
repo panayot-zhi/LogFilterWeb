@@ -98,8 +98,7 @@
 <script>
     function constructListsUsageTable() {
 
-        var data = null;
-        var someFlag = null;
+        var data = null;        
 
         var table = $("#listsUsageTable");
         var card = $("#listsUsageTableCard");
@@ -131,9 +130,7 @@
             });
         }
 
-        function updateMeta(metaData) {
-
-            console.log("The value of some flag is:", someFlag);
+        function updateMeta(metaData) {            
 
             $('#getCsvZip input[name="filePaths"]').remove();
             $('#getLogsZip input[name="filePaths"]').remove();
@@ -241,14 +238,16 @@
                                 </td>
                             </tr>`);
 
-            if (data == null) {
-                data = tableData;
-                table.trigger('constructed.table.now-ui', [data]);
-            } else {
-                data = tableData;
-                table.trigger('updated.table.now-ui', [data]);
-            }
+            if (data == null) {                
+                table.trigger('constructed.table.now-ui', [tableData]);
+            } else {                
+                table.trigger('updated.table.now-ui', [tableData]);
+            }            
+
+            data = tableData;
         }
+
+        // EVENTS ->
 
         table.on('click',
             "thead a.sortable",
@@ -314,9 +313,7 @@
                 updateData();
             });
 
-        return {
-
-            someFlag: someFlag,
+        return {            
 
             card: card,
             table: table,
