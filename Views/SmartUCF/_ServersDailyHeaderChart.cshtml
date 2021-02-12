@@ -1,0 +1,233 @@
+﻿<div id="serversDailyUsageHeaderChartPanel" class="panel-header panel-header-lg">
+    <div id="serversDailyUsageHeaderChartLoader">
+        <div class="hrc-spinner text-white">
+            <div class="bounce1 bg-white"></div>
+            <div class="bounce2 bg-white"></div>
+            <div class="bounce3 bg-white"></div>
+            Loading
+        </div>
+    </div>
+    <canvas id="serversDailyUsageHeaderChart"></canvas>
+</div>
+
+<script>
+    function constructServersDailyUsageHeaderChart() {
+
+        var data = null;
+        var chart = null;
+
+        var listName = null;
+        var displayProperty = null;
+
+        var canvas = $("#serversDailyUsageHeaderChart");
+        var panel = $("#serversDailyUsageHeaderChartPanel");
+        var loader = $("#serversDailyUsageHeaderChartLoader");
+
+        // NOTE: External elements
+        var title = $("#headerChartTitle");
+        var options = $("#headerChartOptions");
+
+        function formatData(raw) {
+            console.log(raw);
+
+            if (!raw.length) {
+                console.warn("No data!");
+                return null;
+            }
+
+            var labels = raw[0].records.map(x => moment(x.date).format('MMM DD'));
+            var colors = raw.map((x) => availableColors[smartUCFServers.indexOf(x.name)]);
+            var datasets = [];
+
+            for (var i = 0; i < raw.length; i++) {
+
+                var server = raw[i];
+
+                datasets.push({
+                    label: "Server S" + server.name,
+                    borderColor: colors[i],
+                    pointBorderColor: namedColors.white,
+                    pointBackgroundColor: colors[i],
+                    pointHoverBackgroundColor: colors[i],
+                    pointHoverBorderColor: namedColors.white,
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 7,
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 5,
+                    fill: true,
+                    backgroundColor: fill,
+                    borderWidth: 2,
+                    data: server.records.map((x) => x[displayProperty])
+                });
+            }
+
+            return {
+                labels: labels,
+                datasets: datasets
+            }
+        }
+
+        function updateMeta(meta) {
+            //console.log(meta);
+            // TODO: Update navbar-brand with the current list display
+            // TODO: Update navbar options with datasets
+        }
+
+        function fetchData(listName) {
+
+            loader.show();
+            loader.nextAll().hide();
+            options.addClass("disabled");
+
+            $.ajax({
+                url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + listsUsageTable.getSelectedLists()[0], // TODO: remove this!
+                success: function(r) {
+                    updateData(r.results, displayProperty);
+                    updateMeta(r.meta);
+                }
+            });
+
+        }
+
+        function updateData(data) {
+
+            var ctx = document.getElementById("serverDailyUsageHeaderChart").getContext("2d");
+            var fill = drawBlueCanvasBackground(ctx);
+
+            if (!displayProperty) {
+                displayProperty = "totalRowsRetrieved";
+                console.log(displayProperty);   
+            }
+
+
+
+
+            if (!data) {
+
+                // TODO: A mechanism to skip retrieval if the list is the same
+
+                // retrieve
+                canvas.hide();
+                loader.show();
+
+                /*var selectedLists = getSelectedListsFromTable();
+                if (!selectedLists.length) {
+                    return null;
+                }*/
+
+                //var listName = selectedLists[0];
+
+
+                return;
+            }
+
+            canvas.show();
+            loader.hide();
+
+            $("#headerChartOptions a[id^=display_property_]").removeClass('active');
+            $(`#display_property_${displayProperty}`).addClass('active');
+
+            // update
+            if (chart) {
+                var newData = formatData(data);
+                chart.data = newData;
+                chart.update();
+                return;
+            }
+
+            // initialize
+            var initialData = formatData(data);
+            chart = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: initialData,
+
+                    options: {
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 60,
+                                top: 0,
+                                bottom: 0
+                            }
+                        },
+                        maintainAspectRatio: false,
+                        tooltips: {
+                            backgroundColor: '#fff',
+                            titleFontColor: '#333',
+                            bodyFontColor: '#666',
+                            bodySpacing: 4,
+                            xPadding: 12,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label;
+                                    var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                                    return '\t' + label + ' : ' + parseFloat(val).toLocaleString('bg');
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                fontColor: '#fff'
+                            },
+                            position: "bottom",
+                            fillStyle: "#FFF",
+                            display: true
+                        },
+                        scales: {
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold",
+                                        beginAtZero: true,
+                                        maxTicksLimit: 5,
+                                        padding: 10,
+                                        callback: function(value, index, values) {
+                                            return nFormatter(value);
+                                        }
+                                    },
+                                    gridLines: {
+                                        drawTicks: true,
+                                        drawBorder: false,
+                                        display: true,
+                                        color: "rgba(255,255,255,0.1)",
+                                        zeroLineColor: "transparent"
+                                    }
+
+                                }
+                            ],
+                            xAxes: [
+                                {
+                                    gridLines: {
+                                        zeroLineColor: "transparent",
+                                        display: false
+
+                                    },
+                                    ticks: {
+                                        padding: 10,
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                });
+
+        }
+
+        return {
+
+            listName: listName,
+            displayProperty: displayProperty,
+
+            updateData: updateData
+        }
+    }
+</script>
