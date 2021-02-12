@@ -91,6 +91,11 @@
 
         function updateData(forList, chartData) {
 
+            if (!forList && !chartData) {
+                showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.")
+                return;
+            }
+
             if (forList === listName) {
                 console.log("Skipping data retrieval, the list is the same: " + listName);
                 return;

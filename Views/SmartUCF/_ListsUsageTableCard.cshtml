@@ -294,13 +294,18 @@
 
                 var checkbox = $(e.target);
                 var selected = checkbox.is(":checked");
+                var listName = checkbox.attr("id").replace("display_", "")
                 var row = checkbox.closest("tr");
-                var index = row.index();
+                var index = row.index();                
+
+                var dataElement = data.find(x => x.id === listName);                
 
                 if (selected) {
+                    dataElement.display = true;
                     row.attr("style", "background-color: " + availableColors[index - 1]);
                 } else {
                     row.removeAttr("style");
+                    dataElement.display = false;
                 }
 
                 table.trigger('updated.table.now-ui', [data]);
