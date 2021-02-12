@@ -35,7 +35,7 @@
                 <span class="navbar-toggler-bar bar3"></span>
             </button>
         </div>
-        <a class="navbar-brand" href="#">Dashboard</a>
+        <a id="headerChartTitle" class="navbar-brand" href="#">Dashboard</a>
     </div>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
@@ -168,102 +168,9 @@ else
 <div class="content">
     <div class="row">
         <div class="col-md-7">
-            <div id="listsUsageTableCard" class="card">
-                <div class="card-header ">
-                    <h5 class="card-category">General Analysis</h5>
-                    <h4 class="card-title">Lists usage table data</h4>
-                    <p class="category">A breakdown of all lists by significance in the monitored period</p>
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
-                            <i class="now-ui-icons loader_gear"></i>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right text-right">
-                            <a class="dropdown-item" href="@Url.Action("GetStopwatchListsData")" target="_blank">Get JSON</a>
+            
+            @await Html.PartialAsync("_ListsUsageTableCard")
 
-                            <form id="getCsvZip" asp-action="GetCsvZip" target="_blank">
-                                <input class="dropdown-item" type="submit" value="Get Csv Zip" />
-                            </form>
-
-                            <form id="getLogsZip" asp-action="GetLogsZip" target="_blank">
-                                <input class="dropdown-item" type="submit" value="Get Logs Zip" />
-                            </form>
-
-                            <a id="refreshListsUsageTable" class="dropdown-item text-danger" href="#">Refresh Data</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="listsUsageTable" class="table">
-                            <thead class="text-primary text-right">
-                                <tr>
-                                    <th class="text-right" style="width: 5%">
-                                        view
-                                    </th>
-                                    <th class="text-center" style="width: 5%">
-                                        #
-                                    </th>
-                                    <th class="text-left" style="width: 40%">
-                                        listName
-                                    </th>
-                                    <th class="text-right" style="width: 10%">
-                                        <a id="sort_by_totalRowsRetrieved" class="sortable desc" href="#">
-                                            total Rows Retrieved<i class="now-ui-icons arrows-1_minimal-down"></i>
-                                        </a>
-                                    </th>
-                                    <th class="text-right" style="width: 10%">
-                                        <a id="sort_by_totalRecords" class="sortable" href="#">
-                                            total<br>Records
-                                        </a>
-                                    </th>
-                                    <th style="width: 10%">
-                                        <a id="sort_by_avgRowsRetrieved" class="sortable" href="#">
-                                            avg<br>Rows Retrieved
-                                        </a>
-                                    </th>
-                                    <th style="width: 10%">
-                                        <a id="sort_by_avgRetrieveTime" class="sortable" href="#">
-                                            avg<br>Retrieve Time (ms)
-                                        </a>
-                                    </th>
-                                    <th style="width: 10%">
-                                        <a id="sort_by_maxRetrieveTime" class="sortable" href="#">
-                                            max<br>Retrieve Time (ms)
-                                        </a>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-right">
-                                <tr id="listsUsageTableLoader">
-                                    <td colspan="8">
-                                        <div class="rect-spinner">
-                                            <div class="rect1 bg-primary"></div>
-                                            <div class="rect2 bg-primary"></div>
-                                            <div class="rect3 bg-primary"></div>
-                                            <div class="rect4 bg-primary "></div>
-                                            <div class="rect5 bg-primary"></div>
-                                            Loading
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer ">
-                    <hr>
-                    <div class="stats">
-                        <div class="dropup">
-                            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
-                                <i class="now-ui-icons travel_info"></i>
-                            </button>
-                            <span class="stats-info"></span>
-                            <div class="dropdown-menu dropdown-menu-left">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="col-lg-5">
@@ -466,11 +373,12 @@ else
                 });
         }
 
-        function getSelectedListsFromTable() {
+/*        function getSelectedListsFromTable() {
             var selectedCheckboxes = $('#listsUsageTable tbody input[type="checkbox"][id^="display_"]:checked');
             return selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
-        }
+        }*/
 
+/*
         function updateListsUsageTable(data) {
 
             function updateInfo(info) {
@@ -506,7 +414,7 @@ else
                 $("#listsUsageTableCard > div.card-header > div > button").attr("disabled", "disabled");
 
                 $.ajax({
-                    url: '@Url.Action("GetStopwatchListsData")',
+                    url: 'Url.Action("GetStopwatchListsData")',
                     success: function(r) {
                         //console.log(r);
                         updateListsUsageTable(r.results);
@@ -608,12 +516,11 @@ else
                 table.trigger('updated.table.now-ui', [data]);
             }
         }
+*/
 
         function updateListsPieChart(data, pieChart) {
 
             function formatData(raw) {
-
-                var selectedLists = getSelectedListsFromTable();
 
                 var labels = ["NotIncluded"];
                 var colors = [namedColors.grey];
@@ -623,7 +530,7 @@ else
                 for (var i = 0; i < raw.length; i++) {
                     var current = raw[i];
 
-                    if (selectedLists.includes(current.id)) {
+                    if (current.display) {
                         labels.push(current.listName);
                         datasets.push(current.totalRowsRetrieved);
                         colors.push(availableColors[i]);
@@ -650,7 +557,7 @@ else
             }
 
             if (pieChart) {
-                pieChart.data = formatData(data, getSelectedListsFromTable());
+                pieChart.data = formatData(data);
                 pieChart.update();
                 return null;
             }
@@ -685,7 +592,7 @@ else
 
                     plugins: [
                         {
-                            beforeInit: function(chart, options) {
+                            beforeInit: function(chart) {
                                 chart.legend.afterFit = function() {
                                     this.height = this.height + 30;
                                 };
@@ -710,13 +617,12 @@ else
                     }
                 }
 
-                var selectedLists = getSelectedListsFromTable();
                 var datasets = [];
 
                 for (var i = 0; i < raw.length; i++) {
                     var current = raw[i];
 
-                    if (!selectedLists.includes(current.id)) {
+                    if (!current.display) {
                         continue;
                     }
 
@@ -751,7 +657,7 @@ else
             }
 
             if (pieChart) {
-                var newData = formatData(data, getSelectedListsFromTable());
+                var newData = formatData(data);
                 updateInfo(newData);
                 pieChart.data = newData;
                 pieChart.update();
@@ -790,7 +696,7 @@ else
 
                     plugins: [
                         {
-                            beforeInit: function(chart, options) {
+                            beforeInit: function(chart) {
                                 chart.legend.afterFit = function() {
                                     this.height = this.height + 30;
                                 };
@@ -874,7 +780,7 @@ else
                 //var listName = selectedLists[0];
 
                 $.ajax({
-                    url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + getSelectedListsFromTable()[0], // undefined?
+                    url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + listsUsageTable.getSelectedLists()[0], // TODO: remove this!
                     success: function(r) {
                         updateServersHeaderChart(r.results, displayProperty);
                         updateInfo(r.meta);
@@ -985,34 +891,35 @@ else
 
         }
 
+        var listsUsageTable;
         $(document).ready(function() {
             const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";
             const modelEndDate = "@Model.EndDate.ToString("dd.MM.yyyy")";
             initializeDateRangePicker(modelStartDate, modelEndDate);
             initializeCurrentServersPicker();
-            updateListsUsageTable();
+            //updateListsUsageTable();
 
-            var tableData;
             var listsPieChart;
             var serversPieChart;
 
-            var listUsageTable = $("#listsUsageTable");
-            listUsageTable.on("constructed.table.now-ui",
-                function(e, data) {
-                    tableData = data;
+            listsUsageTable = window.constructListsUsageTable();
+            listsUsageTable.table.on("constructed.table.now-ui",
+                function (e, data) {
                     listsPieChart = updateListsPieChart(data);
                     serversPieChart = updateServersPieChart(data);
                     updateServersHeaderChart();
                 });
 
-            listUsageTable.on("updated.table.now-ui",
-                function() {
-                    updateListsPieChart(tableData, listsPieChart);
-                    updateServersPieChart(tableData, serversPieChart);
+            listsUsageTable.table.on("updated.table.now-ui",
+                function(e, data) {
+                    updateListsPieChart(data, listsPieChart);
+                    updateServersPieChart(data, serversPieChart);
                     updateServersHeaderChart();
                 });
 
-            listUsageTable.on('click',
+            listsUsageTable.updateData();
+
+            /*listUsageTable.on('click',
                 'input[type="checkbox"][id^=display_]',
                 function(e) {
 
@@ -1028,9 +935,9 @@ else
                     }
 
                     listUsageTable.trigger('updated.table.now-ui', [e.target, e.target.checked, index]);
-                });
+                });*/
 
-            listUsageTable.on('click',
+            /*listUsageTable.on('click',
                 "thead a.sortable",
                 function(e) {
                     e.preventDefault();
@@ -1063,12 +970,12 @@ else
 
                     updateListsUsageTable(tableData);
                     listUsageTable.trigger('updated.table.now-ui', [e.target, descendingOrder]);
-                });
+                });*/
 
             $("#headerChartOptions a.dropdown-item").on('click',
                 function(e) {
                     e.preventDefault();
-
+                    listsUsageTable.someFlag = true;
                     var displayProperty = this.id.replace("display_property_", "");
                     updateServersHeaderChart(null, displayProperty);
 
@@ -1081,12 +988,13 @@ else
                     serverHeaderChart = null;
                     updateServersHeaderChart();
                 });
+/*
 
             $("#refreshListsUsageTable").on('click',
                 function(e) {
                     e.preventDefault();
                     updateListsUsageTable();
-                });
+                });*/
         });
     </script>
 }
