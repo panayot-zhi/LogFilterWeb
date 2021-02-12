@@ -154,7 +154,7 @@ namespace LogFilterWeb.Controllers.Api
                             Records = result
                         };
 
-                    }).OrderByDescending(x => x.Name)
+                    })
             };
         }
 
@@ -224,7 +224,7 @@ namespace LogFilterWeb.Controllers.Api
                             Records = result
                         };
 
-                    }).OrderByDescending(x => x.Name)
+                    }).OrderBy(x => x.Name)
             };
         }
     }
