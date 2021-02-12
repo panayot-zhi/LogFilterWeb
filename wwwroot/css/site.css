@@ -5,6 +5,10 @@
 }
 
 /* NowUI Overrides */
+.navbar .navbar-brand small {
+    text-transform: none;
+}
+
 .card-chart .card-header .card-title {
     margin-bottom: 10px;
 }
