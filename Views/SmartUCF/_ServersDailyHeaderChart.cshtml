@@ -67,7 +67,7 @@
         }
 
         function updateMeta(meta) {
-            title.html(`${meta.listDisplayName} <small>- ${displayProperty}</small>`)
+            title.html(`${meta.listDisplayName} <small>- ${displayProperty}</small>`);
         }
 
         function fetchData(forList) {
@@ -90,7 +90,8 @@
         function updateData(forList, chartData) {
 
             if (!forList && !chartData) {
-                showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.");
+                //showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.");
+                console.log("Header chart cannot display historical data without a list selected. Please select a list from the table.");
                 return;
             }
 
@@ -115,8 +116,8 @@
             loader.hide();
             options.removeClass("disabled");            
 
-            $("#headerChartOptions a[id^=display_property_]").removeClass('active');
-            $(`#display_property_${displayProperty}`).addClass('active');                        
+            options.find("a[data-display]").removeClass('active');
+            options.find(`a[data-display="${displayProperty}"]`).addClass('active');                        
 
             // update
             if (chart) {
@@ -222,17 +223,16 @@
             "a.dropdown-item",
             function (e) {
                 e.preventDefault();
-                
-                var id = this.id;                
+
                 var lastRetrievedList = listName;
                 listName = null;
 
-                if (id === "headerChartRefresh") {                                 
+                if ($(this.hasClass('refresh'))) {
                     updateData(lastRetrievedList);
                     return;
                 }
 
-                displayProperty = id.replace("display_property_", "");
+                displayProperty = this.dataset.display;
                 updateData(lastRetrievedList);
 
             });

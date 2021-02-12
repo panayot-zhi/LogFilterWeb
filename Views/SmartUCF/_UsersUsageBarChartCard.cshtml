@@ -1,0 +1,236 @@
+﻿<div id="usersUsageBarChartCard" class="card card-chart">
+    <div class="card-header">
+        <h5 class="card-category">General Analysis</h5>
+        <h4 class="card-title">User Statistics</h4>
+        <p class="category">Displays the the top 10 users that have the highest amount of <b>total retrieved rows</b> for the chosen list in the monitored period.</p>
+        
+        <div class="dropdown">
+            <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
+                <i class="now-ui-icons loader_gear"></i>
+            </button>
+            <div id="usersUsageBarChartOptions" class="dropdown-menu dropdown-menu-right text-right">
+                <h6 class="dropdown-header">Display property</h6>
+                <a class="dropdown-item" data-display="totalRowsRetrieved" href="#">totalRowsRetrieved</a>
+                <a class="dropdown-item" data-display="totalRecords" href="#">totalRecords</a>
+                <a class="dropdown-item" data-display="avgRowsRetrieved" href="#">avgRowsRetrieved</a>
+                <a class="dropdown-item" data-display="avgRetrieveTime" href="#">avgRetrieveTime</a>
+                <a class="dropdown-item" data-display="maxRetrieveTime" href="#">maxRetrieveTime</a>
+                <a class="dropdown-item" data-display="maxRowsRetrieved" href="#">maxRowsRetrieved</a>
+                <h6 class="dropdown-header">Other</h6>
+                <a class="dropdown-item refresh" href="#">refresh</a>
+            </div>
+        </div>
+
+    </div>
+    <div class="card-body">
+        <div id="usersUsageBarChartLoader">
+            <div class="sk-cube-grid">
+                <div class="sk-cube sk-cube1 bg-primary"></div>
+                <div class="sk-cube sk-cube2 bg-primary"></div>
+                <div class="sk-cube sk-cube3 bg-primary"></div>
+                <div class="sk-cube sk-cube4 bg-primary"></div>
+                <div class="sk-cube sk-cube5 bg-primary"></div>
+                <div class="sk-cube sk-cube6 bg-primary"></div>
+                <div class="sk-cube sk-cube7 bg-primary"></div>
+                <div class="sk-cube sk-cube8 bg-primary"></div>
+                <div class="sk-cube sk-cube9 bg-primary"></div>
+            </div>
+        </div>
+        <div class="chart-area">
+            <canvas id="usersUsageBarChart"></canvas>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="stats">
+            <i class="now-ui-icons ui-2_time-alarm"></i> IMPLEMENT ME
+        </div>
+    </div>
+</div>
+
+<script>
+    function constructUsersUsageBarChartCard() {
+
+        var chart = null;
+        var chartFill = null;
+
+        var listName = null;
+        var displayProperty = null;
+
+        var canvas = $("#usersUsageBarChart");
+        var panel = $("#usersUsageBarChartPanel");
+        var loader = $("#usersUsageBarChartLoader");
+
+        var options = $("#usersUsageBarChartOptions");
+
+        function formatData(raw) {
+            console.log(raw);
+
+            if (!raw.length) {
+                console.warn("No data!");
+                return null;
+            }
+
+            var labels = raw.map(x => x.name);
+
+            var datasets = [{
+                label: displayProperty,
+                backgroundColor: chartFill,
+                borderColor: "#2CA8FF",
+                pointBorderColor: "#FFF",
+                pointBackgroundColor: "#2CA8FF",
+                pointBorderWidth: 2,
+                pointHoverRadius: 4,
+                pointHoverBorderWidth: 1,
+                pointRadius: 4,
+                fill: true,
+                borderWidth: 1,
+                data: raw.map(x => x[displayProperty])
+            }];
+
+            return {
+                labels: labels,
+                datasets: datasets
+            }
+        }
+
+        function updateMeta(meta) {
+            // TODO
+        }
+
+        function fetchData(forList) {
+
+            canvas.hide();
+            loader.show();            
+            options.addClass("disabled");
+
+            $.ajax({
+                url: '@Url.Action("GetStopwatchUsersData")?listName=' + forList,
+                success: function (r) {
+                    listName = forList;
+                    updateData(null, r.results);
+                    updateMeta(r.meta);                    
+                }
+            });
+
+        }
+
+        function updateData(forList, chartData) {
+
+            if (!forList && !chartData) {
+                //showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.");
+                console.log("Users usage chart cannot display historical data without a list selected. Please select a list from the table.");
+                return;
+            }
+
+            if (forList === listName) {
+                showInfoNotification("Header chart will skip data retrieval, because the list is the same as the one loaded before.")
+                return;
+            }
+
+            var ctx = canvas[0].getContext("2d");
+            chartFill = drawBlueCanvasBackground(ctx);
+
+            if (!displayProperty) {
+                displayProperty = "totalRowsRetrieved";
+            }
+
+            if (!chartData) {
+                fetchData(forList);
+                return;
+            }
+
+            canvas.show();
+            loader.hide();
+            options.removeClass("disabled");
+
+            options.find("a[data-display]").removeClass('active');
+            options.find(`a[data-display="${displayProperty}"]`).addClass('active');     
+
+            // update
+            if (chart) {
+                var newData = formatData(chartData);
+                chart.data = newData;
+                chart.update();
+
+                panel.trigger('updated.barChart.now-ui', [listName, displayProperty, chartData]);
+
+                return;
+            }
+
+            // initialize
+            var initialData = formatData(chartData);
+            chart = new Chart(ctx,
+                {
+                    type: "bar",
+                    data: initialData,
+                    options: {
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            bodySpacing: 4,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            xPadding: 10,
+                            yPadding: 10,
+                            caretPadding: 10,
+                            enabled: true,
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+
+                                    const dataset = data.datasets[tooltipItem.datasetIndex];
+                                    const val = dataset.data[tooltipItem.index];
+                                    const label = dataset.label;
+
+                                    return '\t' + label + ' : ' + parseFloat(val).toLocaleString('bg');
+                                }
+
+                            }
+                        },
+                        responsive: 1,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return nFormatter(value);
+                                    }
+                                },
+                                gridLines: {
+                                    zeroLineColor: "transparent",
+                                    drawBorder: false
+                                }
+                            }],
+                            /*xAxes: [{
+                                display: 0,
+                                ticks: {
+                                    display: true
+                                },
+                                gridLines: {
+                                    zeroLineColor: "transparent",
+                                    drawTicks: false,
+                                    display: false,
+                                    drawBorder: false
+                                }
+                            }]*/
+                        },
+                        layout: {
+                            padding: {
+                                left: 0,
+                                right: 0,
+                                top: 15,
+                                bottom: 15
+                            }
+                        }
+                    }
+                });
+
+            panel.trigger('constructed.barChart.now-ui', [listName, displayProperty, chartData]);
+        }
+
+        return {
+            updateData: updateData
+        }
+    }
+</script>

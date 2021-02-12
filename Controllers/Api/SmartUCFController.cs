@@ -227,5 +227,81 @@ namespace LogFilterWeb.Controllers.Api
                     }).OrderBy(x => x.Name)
             };
         }
+
+        [HttpGet]
+        public dynamic GetStopwatchUsersData(string listName)
+        {
+            if (string.IsNullOrWhiteSpace(listName))
+            {
+                throw new ArgumentNullException(nameof(listName));
+            }
+
+            dynamic meta = new ExpandoObject();
+
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
+            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var query = data.AsParallel();
+
+            meta.listName = listName;
+            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
+
+            query = query.Where(x => x.ListName == listName);
+            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.User,
+                    resultSelector: (user, groupByUser) =>
+                    {
+                        var groupByUserArray = groupByUser as StopwatchRecord[] ?? groupByUser.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            var dailyRecords = groupByUserArray.Where(x => x.Date == day).ToArray();
+
+                            if (dailyRecords.Length > 0)
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = dailyRecords.Length,
+                                    TotalRowsRetrieved = dailyRecords.Sum(x => x.NumberOfRows),
+                                    MaxRowsRetrieved = dailyRecords.Max(x => x.NumberOfRows),
+                                    AvgRowsRetrieved = dailyRecords.Average(x => x.NumberOfRows),
+                                    MaxRetrieveTime = dailyRecords.Max(x => x.RetrieveMilliseconds),
+                                    AvgRetrieveTime = dailyRecords.Average(x => x.RetrieveMilliseconds),
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = 0,
+                                    TotalRowsRetrieved = 0,
+                                    MaxRowsRetrieved = 0,
+                                    MaxRetrieveTime = 0,
+                                    AvgRetrieveTime = 0
+                                });
+                            }
+                        }
+
+                        return new
+                        {
+                            Name = user,
+                            TotalRecords = groupByUserArray.Length,
+                            TotalRowsRetrieved = groupByUserArray.Sum(x => x.NumberOfRows),
+                            MaxRowsRetrieved = groupByUserArray.Max(x => x.NumberOfRows),
+                            AvgRowsRetrieved = groupByUserArray.Average(x => x.NumberOfRows),
+                            MaxRetrieveTime = groupByUserArray.Max(x => x.RetrieveMilliseconds),
+                            AvgRetrieveTime = groupByUserArray.Average(x => x.RetrieveMilliseconds),
+                            Records = result
+                        };
+
+                    }).OrderByDescending(x => x.TotalRowsRetrieved).Take(10)
+            };
+        }
     }
 }
