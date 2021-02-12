@@ -12,9 +12,9 @@
 
 <script>
     function constructServersDailyUsageHeaderChart() {
-
-        var data = null;
+        
         var chart = null;
+        var chartFill = null;
 
         var listName = null;
         var displayProperty = null;
@@ -27,8 +27,7 @@
         var title = $("#headerChartTitle");
         var options = $("#headerChartOptions");
 
-        function formatData(raw) {
-            console.log(raw);
+        function formatData(raw) {           
 
             if (!raw.length) {
                 console.warn("No data!");
@@ -54,9 +53,9 @@
                     pointHoverRadius: 7,
                     pointHoverBorderWidth: 2,
                     pointRadius: 5,
-                    fill: true,
-                    backgroundColor: fill,
+                    fill: true,                    
                     borderWidth: 2,
+                    backgroundColor: chartFill,
                     data: server.records.map((x) => x[displayProperty])
                 });
             }
@@ -73,70 +72,62 @@
             // TODO: Update navbar options with datasets
         }
 
-        function fetchData(listName) {
+        function fetchData(forList) {
 
-            loader.show();
-            loader.nextAll().hide();
+            canvas.hide();
+            loader.show();            
             options.addClass("disabled");
 
             $.ajax({
-                url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + listsUsageTable.getSelectedLists()[0], // TODO: remove this!
-                success: function(r) {
-                    updateData(r.results, displayProperty);
-                    updateMeta(r.meta);
+                url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + forList,
+                success: function (r) {
+                    listName = forList;
+                    updateData(null, r.results);
+                    updateMeta(r.meta);                    
                 }
             });
 
         }
 
-        function updateData(data) {
+        function updateData(forList, chartData) {
 
-            var ctx = document.getElementById("serverDailyUsageHeaderChart").getContext("2d");
-            var fill = drawBlueCanvasBackground(ctx);
-
-            if (!displayProperty) {
-                displayProperty = "totalRowsRetrieved";
-                console.log(displayProperty);   
+            if (forList === listName) {
+                console.log("Skipping data retrieval, the list is the same: " + listName);
+                return;
             }
 
+            var ctx = canvas[0].getContext("2d");
+            chartFill = drawBlueCanvasBackground(ctx);            
 
+            if (!displayProperty) {
+                displayProperty = "totalRowsRetrieved";                
+            }
 
-
-            if (!data) {
-
-                // TODO: A mechanism to skip retrieval if the list is the same
-
-                // retrieve
-                canvas.hide();
-                loader.show();
-
-                /*var selectedLists = getSelectedListsFromTable();
-                if (!selectedLists.length) {
-                    return null;
-                }*/
-
-                //var listName = selectedLists[0];
-
-
+            if (!chartData) {
+                fetchData(forList);
                 return;
             }
 
             canvas.show();
             loader.hide();
+            options.removeClass("disabled");            
 
             $("#headerChartOptions a[id^=display_property_]").removeClass('active');
-            $(`#display_property_${displayProperty}`).addClass('active');
+            $(`#display_property_${displayProperty}`).addClass('active');                        
 
             // update
             if (chart) {
-                var newData = formatData(data);
+                var newData = formatData(chartData);
                 chart.data = newData;
                 chart.update();
+
+                panel.trigger('updated.headerChart.now-ui', [listName, displayProperty, chartData]);
+
                 return;
             }
 
             // initialize
-            var initialData = formatData(data);
+            var initialData = formatData(chartData);
             chart = new Chart(ctx,
                 {
                     type: 'line',
@@ -175,8 +166,7 @@
                             labels: {
                                 fontColor: '#fff'
                             },
-                            position: "bottom",
-                            fillStyle: "#FFF",
+                            position: "bottom",                            
                             display: true
                         },
                         scales: {
@@ -211,6 +201,7 @@
                                     },
                                     ticks: {
                                         padding: 10,
+                                        //fontColor: "rgba(255,255,255,0.4)",
                                         fontColor: "rgba(255,255,255,0.4)",
                                         fontStyle: "bold"
                                     }
@@ -219,6 +210,8 @@
                         }
                     }
                 });
+
+            panel.trigger('constructed.headerChart.now-ui', [listName, displayProperty, chartData]);
 
         }
 

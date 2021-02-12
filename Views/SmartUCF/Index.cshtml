@@ -152,7 +152,7 @@
 }
 else
 {
-    <div class="panel-header panel-header-lg">
+    @*<div class="panel-header panel-header-lg">
             <div id="serverDailyUsageHeaderChartLoader">
                 <div class="hrc-spinner text-white">
                     <div class="bounce1 bg-white"></div>
@@ -162,7 +162,9 @@ else
                 </div>
             </div>
             <canvas id="serverDailyUsageHeaderChart"></canvas>
-        </div>
+        </div>*@
+
+    @await Html.PartialAsync("_ServersDailyHeaderChart")
 }
 
 <div class="content">
@@ -706,8 +708,8 @@ else
                 });
         }
 
-        var serverHeaderChart;
-        function updateServersHeaderChart(data, displayProperty) {
+        //var serverHeaderChart;
+       /* function updateServersHeaderChart(data, displayProperty) {
 
             var headerChart = $("#serverDailyUsageHeaderChart");
             var headerChartLoader = $("#serverDailyUsageHeaderChartLoader");
@@ -772,15 +774,15 @@ else
                 headerChart.hide();
                 headerChartLoader.show();
 
-                /*var selectedLists = getSelectedListsFromTable();
+                var selectedLists = getSelectedListsFromTable();
                 if (!selectedLists.length) {
                     return null;
-                }*/
+                }
 
                 //var listName = selectedLists[0];
 
                 $.ajax({
-                    url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + listsUsageTable.getSelectedLists()[0], // TODO: remove this!
+                    url: 'Url.Action("GetStopwatchServerDataByDay")?listName=' + listsUsageTable.getSelectedLists()[0], // TODO: remove this!
                     success: function(r) {
                         updateServersHeaderChart(r.results, displayProperty);
                         updateInfo(r.meta);
@@ -889,7 +891,7 @@ else
                     }
                 });
 
-        }
+        }*/
 
         var listsUsageTable;
         $(document).ready(function() {
@@ -901,20 +903,25 @@ else
 
             var listsPieChart;
             var serversPieChart;
+            var serversDailyHeaderChart = window.constructServersDailyUsageHeaderChart();
 
             listsUsageTable = window.constructListsUsageTable();
             listsUsageTable.table.on("constructed.table.now-ui",
                 function (e, data) {
                     listsPieChart = updateListsPieChart(data);
                     serversPieChart = updateServersPieChart(data);
-                    updateServersHeaderChart();
+
+                    var currentList = listsUsageTable.getSelectedLists()[0];
+                    serversDailyHeaderChart.updateData(currentList);                    
                 });
 
             listsUsageTable.table.on("updated.table.now-ui",
                 function(e, data) {
                     updateListsPieChart(data, listsPieChart);
                     updateServersPieChart(data, serversPieChart);
-                    updateServersHeaderChart();
+
+                    var currentList = listsUsageTable.getSelectedLists()[0];
+                    serversDailyHeaderChart.updateData(currentList);
                 });
 
             listsUsageTable.updateData();
@@ -975,9 +982,9 @@ else
             $("#headerChartOptions a.dropdown-item").on('click',
                 function(e) {
                     e.preventDefault();
-                    listsUsageTable.someFlag = true;
-                    var displayProperty = this.id.replace("display_property_", "");
-                    updateServersHeaderChart(null, displayProperty);
+                    
+                    //var displayProperty = this.id.replace("display_property_", "");
+                    //updateServersHeaderChart(null, displayProperty);
 
                 });
 
