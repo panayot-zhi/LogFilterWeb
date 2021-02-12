@@ -67,9 +67,7 @@
         }
 
         function updateMeta(meta) {
-            //console.log(meta);
-            // TODO: Update navbar-brand with the current list display
-            // TODO: Update navbar options with datasets
+            title.html(`${meta.listDisplayName} <small>- ${displayProperty}</small>`)
         }
 
         function fetchData(forList) {
@@ -92,12 +90,12 @@
         function updateData(forList, chartData) {
 
             if (!forList && !chartData) {
-                showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.")
+                showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.");
                 return;
             }
 
             if (forList === listName) {
-                console.log("Skipping data retrieval, the list is the same: " + listName);
+                showInfoNotification("Header chart will skip data retrieval, because the list is the same as the one loaded before.")                
                 return;
             }
 
@@ -205,8 +203,7 @@
 
                                     },
                                     ticks: {
-                                        padding: 10,
-                                        //fontColor: "rgba(255,255,255,0.4)",
+                                        padding: 10,                                        
                                         fontColor: "rgba(255,255,255,0.4)",
                                         fontStyle: "bold"
                                     }
@@ -231,7 +228,7 @@
                 listName = null;
 
                 if (id === "headerChartRefresh") {                                 
-                    updateData(retrieveList);
+                    updateData(lastRetrievedList);
                     return;
                 }
 
