@@ -217,8 +217,28 @@
                 });
 
             panel.trigger('constructed.headerChart.now-ui', [listName, displayProperty, chartData]);
-
         }
+
+        // EVENTS ->
+
+        options.on('click',
+            "a.dropdown-item",
+            function (e) {
+                e.preventDefault();
+                
+                var id = this.id;                
+                var lastRetrievedList = listName;
+                listName = null;
+
+                if (id === "headerChartRefresh") {                                 
+                    updateData(retrieveList);
+                    return;
+                }
+
+                displayProperty = id.replace("display_property_", "");
+                updateData(lastRetrievedList);
+
+            });
 
         return {
 
