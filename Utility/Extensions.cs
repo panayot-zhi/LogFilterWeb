@@ -4,7 +4,13 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 
@@ -58,6 +64,31 @@ namespace LogFilterWeb.Utility
         public static void Add(this ZipArchive zip, string filepath, string filename)
         {
             zip.Add(File.ReadAllBytes(filepath), filename);
+        }
+    }
+
+    [HtmlTargetElement("script", Attributes = MinifyAttributeName)]
+    public class ScriptTagHelper : TagHelper
+    {
+        private const string MinifyAttributeName = "minify";
+
+        [HtmlAttributeName(MinifyAttributeName)]
+        public bool ShouldMinify { get; set; }
+
+        public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+        {
+            if (!ShouldMinify)
+            {
+                await base.ProcessAsync(context, output);
+                return;
+            }
+
+            var textChildContent = await output.GetChildContentAsync();
+            var scriptContent = textChildContent.GetContent();
+
+            var minifiedContent = NUglify.Uglify.Js(scriptContent).Code;
+
+            output.Content.SetHtmlContent(minifiedContent);
         }
     }
 
