@@ -1,0 +1,123 @@
+﻿<div id="listsUsagePieChartCard" class="card card-chart">
+    <div class="card-header">
+        <h5 class="card-category">General Analysis</h5>
+        <h4 class="card-title">Percentage of all lists usage</h4>
+        <p class="category">Displays the percent that the chosen lists represent in comparison to other lists for the <b>total retrieved rows</b> in the monitored period.</p>
+    </div>
+    <div class="card-body">
+        <div id="listsUsagePieChartLoader">
+            <div class="pulse-spinner bg-primary"></div>
+        </div>
+        <div class="chart-area" style="height: auto;">
+            <canvas id="listsUsagePieChart"></canvas>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="stats">
+            <i class="now-ui-icons travel_info"></i> <span class="stats-info">IMPLEMENT ME</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    function constructListsUsagePieChartCard() {
+
+        var pieChart = null;
+
+        var canvas = $("#listsUsagePieChart");
+        var pieChartLoader = $("#listsUsagePieChartLoader");
+
+        function formatData(raw) {
+
+            var labels = ["NotIncluded"];
+            var colors = [namedColors.grey];
+            var datasets = [0];
+
+
+            for (var i = 0; i < raw.length; i++) {
+                var current = raw[i];
+
+                if (current.display) {
+                    labels.push(current.listName);
+                    datasets.push(current.totalRowsRetrieved);
+                    colors.push(availableColors[i]);
+                    continue;
+                }
+
+                datasets[0] += current.totalRowsRetrieved;
+            }
+
+            return {
+                datasets: [
+                    {
+                        data: datasets,
+                        backgroundColor: colors
+                    }
+                ],
+
+                labels: labels
+            }
+        }
+
+        function updateMeta(meta) {
+
+            // TODO
+        }
+
+        function updateData(data) {            
+
+            if (!data) {
+                throw Error("No data! Pie chart cannot initialize.");
+            }
+
+            if (pieChart) {
+                pieChart.data = formatData(data);
+                pieChart.update();
+                return null;
+            }                                   
+
+            pieChartLoader.hide();
+
+            var chartData = formatData(data);
+            updateMeta(chartData);
+
+            var ctx = canvas[0].getContext("2d");
+
+            pieChart = new Chart(ctx,
+                {
+                    type: 'pie',
+                    data: chartData,
+
+                    options: {
+                        tooltips: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (tooltipItem, data) {                                    
+                                    const label = data.labels[tooltipItem.index];
+                                    const val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                                    const total = data.datasets[tooltipItem.datasetIndex].data.reduce((x, y) => x + y, 0);
+
+                                    return '\t' + label + ' : ' + parseFloat(val / total * 100.0).toFixed(4) + "%";
+                                }
+
+                            }
+                        }
+                    },
+
+                    plugins: [
+                        {
+                            beforeInit: function (chart) {
+                                chart.legend.afterFit = function () {
+                                    this.height = this.height + 30;
+                                };
+                            }
+                        }
+                    ]
+                });
+        }   
+
+        return {
+            updateData: updateData
+        }
+    }
+</script>
