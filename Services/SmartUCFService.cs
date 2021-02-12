@@ -18,9 +18,9 @@ namespace LogFilterWeb.Services
             var from = cookieData.StartDate.Date;
             var to = cookieData.EndDate.Date;
 
-
+            bool fromCache;
             var smartUCFRoute = FilesHelper.GetSmartUCFRoute(Constants.SmartUCFDefaultConfig);
-            var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv");
+            var csvFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(smartUCFRoute), "[stopwatch]-lists.csv", out fromCache);
 
             var filesInRange = csvFiles.Where(x => // config/machineName/yyyy-MM-dd/[stopwatch]-lists.csv
                 x.Directory?.Parent != null && 
@@ -41,6 +41,7 @@ namespace LogFilterWeb.Services
             }*/
 
             meta.from = from;
+            meta.fromCache = fromCache;
             meta.config = Constants.SmartUCFDefaultConfig;
             meta.files = filesInRangeArray.Select(x => x.FullName);
             meta.to = to;

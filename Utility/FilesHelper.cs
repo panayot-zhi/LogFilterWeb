@@ -30,8 +30,9 @@ namespace LogFilterWeb.Utility
         /// </summary>
         /// <param name="directoryInfo">The directory to look in. The method looks in all subsequent directories.</param>
         /// <param name="searchPattern">The search string to match against the names of files. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters, but it doesn't support regular expressions.</param>
+        /// <param name="fromCache">Am output flag that indicates whether or not the result was retrieved from the cache.</param>
         /// <returns>FileInfo's enumerated, could be from cache.</returns>
-        public static IEnumerable<FileInfo> GetFilesFromDirectory(DirectoryInfo directoryInfo, string searchPattern)
+        public static IEnumerable<FileInfo> GetFilesFromDirectory(DirectoryInfo directoryInfo, string searchPattern, out bool fromCache)
         {
             var key = Hash($"{directoryInfo.FullName}, {searchPattern}");
 
@@ -39,6 +40,8 @@ namespace LogFilterWeb.Utility
             var cacheEntry = Cache.Get<IEnumerable<FileInfo>>(key);
             if (cacheEntry != null && UseCache)
             {
+                fromCache = true;
+
                 // if we're allowed to use the cache,
                 // and there is an entry retrieved
                 return cacheEntry;
@@ -49,6 +52,8 @@ namespace LogFilterWeb.Utility
 
             // refresh the record data in cache
             Cache.Set(key, result, TimeSpan.FromHours(1));
+
+            fromCache = false;
 
             return result;
         }
