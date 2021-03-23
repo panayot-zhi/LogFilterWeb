@@ -77,7 +77,7 @@
             options.addClass("disabled");
 
             $.ajax({
-                url: '@Url.Action("GetStopwatchServerDataByDay")?listName=' + forList,
+                url: '@Url.Action("GetStopwatchServerDataByDay", "SmartUCFApi")?listName=' + forList,
                 success: function (r) {
                     listName = forList;
                     updateData(null, r.results);

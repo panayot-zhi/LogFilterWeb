@@ -104,7 +104,7 @@
             options.addClass("disabled");
 
             $.ajax({
-                url: '@Url.Action("GetStopwatchUsersData")?listName=' + forList,
+                url: '@Url.Action("GetStopwatchUsersData", "SmartUCFApi")?listName=' + forList,
                 success: function (r) {
                     listName = forList;
                     updateData(null, r.results);
