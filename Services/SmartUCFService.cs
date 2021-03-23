@@ -10,7 +10,7 @@ namespace LogFilterWeb.Services
 {
     public static class SmartUCFService
     {
-        public static IEnumerable<StopwatchRecord> GetStopwatchRecordsForRange(SmartUCF cookieData, ref dynamic meta)
+        public static IEnumerable<StopwatchRecord> GetStopwatchRecords(SmartUCF cookieData, ref dynamic meta)
         {
             meta.begin = DateTime.Now.ToLocalTime();
 
