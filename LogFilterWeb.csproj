@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Domain\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
