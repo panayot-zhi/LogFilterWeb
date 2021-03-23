@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LogFilterWeb.Controllers.Api
 {
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class ValuesApiController : ControllerBase
     {
         [HttpGet]
         [Route("api/values/ping")]

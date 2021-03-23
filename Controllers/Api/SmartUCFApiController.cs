@@ -12,7 +12,7 @@ namespace LogFilterWeb.Controllers.Api
 {
     [ApiController]
     [Route("api/smartUCF/[action]")]
-    public class SmartUCFController : ControllerBase
+    public class SmartUCFApiController : ControllerBase
     {
         [HttpGet]
         public dynamic GetStopwatchListsData(string listName)
@@ -20,7 +20,7 @@ namespace LogFilterWeb.Controllers.Api
             dynamic meta = new ExpandoObject();
             
             var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
             var query = data.AsParallel();
 
             if (!string.IsNullOrEmpty(listName))
@@ -94,7 +94,7 @@ namespace LogFilterWeb.Controllers.Api
             dynamic meta = new ExpandoObject();
             
             var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
             var query = data.AsParallel();
 
             query = query.Where(x => x.ListName == listName);
@@ -169,7 +169,7 @@ namespace LogFilterWeb.Controllers.Api
             dynamic meta = new ExpandoObject();
 
             var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
             var query = data.AsParallel();
 
             meta.listName = listName;
@@ -239,7 +239,7 @@ namespace LogFilterWeb.Controllers.Api
             dynamic meta = new ExpandoObject();
 
             var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-            var data = SmartUCFService.GetStopwatchRecordsForRange(cookieData, ref meta);
+            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
             var query = data.AsParallel();
 
             meta.listName = listName;
