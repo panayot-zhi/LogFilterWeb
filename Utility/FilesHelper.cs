@@ -77,6 +77,73 @@ namespace LogFilterWeb.Utility
             return ReadStopWatchRecords(fileInfo.FullName);
         }
 
+        public static SummaryFile ReadSummary(FileInfo fileInfo)
+        {
+            return ReadSummary(fileInfo.FullName);
+        }
+
+        public static SummaryFile ReadSummary(string filePath)
+        {
+            var machineName = GetSUOSMachineName(filePath, out _);
+
+            var summary = ReadJson<SummaryFile>(filePath);
+
+            summary.MachineName = machineName;
+
+            return summary;
+        }
+
+        public static SummaryFile Combine(IEnumerable<SummaryFile> list)
+        {
+            SummaryFile result = null;
+            foreach (var summary in list)
+            {
+                if (result == null)
+                {
+                    result = ObjectCloner.JsonCopy(summary);
+                    result.MachineName = null;
+                    continue;
+                }
+
+                result = Combine(result, summary);
+            }
+
+            return result;
+        }
+
+        public static SummaryFile Combine(SummaryFile source, SummaryFile other)
+        {
+            var result = ObjectCloner.JsonCopy(source);
+
+            result.LinesRead += other.LinesRead;
+            result.LogsRead += other.LogsRead;
+            result.NonStandardEntries += other.NonStandardEntries;
+            result.EntriesConstructed += other.EntriesConstructed;
+            result.FilteredEntries += other.FilteredEntries;
+            result.LinesWritten += other.LinesWritten;
+            result.FilesWritten += other.FilesWritten;
+            result.FilesRead += other.FilesRead;
+
+            result.BeginProcessTimestamp = GetMinProcessTimestamp(source.BeginProcessTimestamp, other.BeginProcessTimestamp);
+            result.EndProcessTimestamp = GetMinProcessTimestamp(source.EndProcessTimestamp, other.EndProcessTimestamp);
+
+            result.Elapsed = TimeSpan.Parse(source.Elapsed).Add(TimeSpan.Parse(other.Elapsed)).ToString();
+
+            result.InputFile = "-";
+
+            foreach (var f in result.Filters)
+            {
+                f.Count += other.Filters.Single(x => x.Name == f.Name).Count;
+            }
+
+            return result;
+        }
+
+        public static string GetMinProcessTimestamp(string a, string b)
+        {
+            return ToDateTime(a) < ToDateTime(b) ? a : b;
+        }
+
         /// <summary>
         /// Reads a stopwatch csv file into a record set.
         /// This method uses cache to store the result records and uses the hashed file name as key.
@@ -112,6 +179,28 @@ namespace LogFilterWeb.Utility
                     RetrieveMilliseconds = int.Parse(columns[4])
 
                 }).ToList();
+
+            // refresh the record data in cache
+            Cache.Set(key, result, TimeSpan.FromHours(1));
+
+            return result;
+        }
+
+        private static T ReadJson<T>(string filePath)
+        {
+            var key = Hash(filePath);
+
+            // check cache for entry
+            var cacheEntry = Cache.Get<T>(key);
+            if (cacheEntry != null && UseCache)
+            {
+                // if we're allowed to use the cache,
+                // and there is an entry retrieved
+                return cacheEntry;
+            }
+
+            // else retrieve the data again
+            var result = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
 
             // refresh the record data in cache
             Cache.Set(key, result, TimeSpan.FromHours(1));
