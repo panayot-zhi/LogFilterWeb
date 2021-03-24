@@ -95,20 +95,20 @@ namespace LogFilterWeb.Utility
 
         public static SummaryFile Combine(IEnumerable<SummaryFile> list)
         {
-            SummaryFile result = null;
+            SummaryFile seed = null;
             foreach (var summary in list)
             {
-                if (result == null)
+                if (seed == null)
                 {
-                    result = ObjectCloner.JsonCopy(summary);
-                    result.MachineName = null;
+                    seed = ObjectCloner.JsonCopy(summary);
+                    seed.MachineName = null;
                     continue;
                 }
 
-                result = Combine(result, summary);
+                seed = Combine(seed, summary);
             }
 
-            return result;
+            return seed;
         }
 
         public static SummaryFile Combine(SummaryFile source, SummaryFile other)
@@ -137,6 +137,39 @@ namespace LogFilterWeb.Utility
             }
 
             return result;
+        }
+
+        public static UserQueryFile Combine(IEnumerable<UserQueryFile> list)
+        {
+            UserQueryFile seed = null;
+            foreach (var queryFile in list)
+            {
+                if (seed == null)
+                {
+                    seed = ObjectCloner.JsonCopy(queryFile);
+                    continue;
+                }
+
+                seed = Combine(seed, queryFile);
+            }
+
+            return seed;
+        }
+
+        public static UserQueryFile Combine(UserQueryFile source, UserQueryFile other)
+        {
+            var resultRecords = ObjectCloner.JsonCopy(source.Records).ToList();
+            resultRecords.AddRange(other.Records.Except(source.Records));
+
+            foreach (var resultRecord in resultRecords)
+            {
+                resultRecord.Count += other.Records.SingleOrDefault(x => x.User == resultRecord.User)?.Count ?? 0;
+            }
+
+            return new UserQueryFile()
+            {
+                Records = resultRecords
+            };
         }
 
         public static string GetMinProcessTimestamp(string a, string b)
