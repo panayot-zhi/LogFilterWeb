@@ -186,6 +186,35 @@ namespace LogFilterWeb.Utility
             return result;
         }
 
+        public static UserQueryFile ReadUserQueryFiles(FileInfo fileInfo, bool extended = false)
+        {
+            return ReadUserQueryFiles(fileInfo.FullName, extended);
+        }
+
+        public static UserQueryFile ReadUserQueryFiles(string filePath, bool extended = false)
+        {
+            var machineName = GetSUOSMachineName(filePath, out _);
+
+            return new UserQueryFile()
+            {
+                Date = DateTime.Now,
+                FullName = filePath,
+                MachineName = machineName,
+                Records = extended ? ReadUserQueryRecordsExtended(filePath) 
+                    : ReadUserQueryRecords(filePath)
+            };
+        }
+
+        public static IEnumerable<UserQueryRecordBase> ReadUserQueryRecords(string filePath)
+        {
+            return ReadJson<IEnumerable<UserQueryRecordBase>>(filePath).OrderByDescending(x => x.Count);
+        }
+
+        public static IEnumerable<UserQueryRecordExtended> ReadUserQueryRecordsExtended(string filePath)
+        {
+            return ReadJson<IEnumerable<UserQueryRecordExtended>>(filePath).OrderByDescending(x => x.Count);
+        }
+
         private static T ReadJson<T>(string filePath)
         {
             var key = Hash(filePath);
