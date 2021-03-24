@@ -30,7 +30,7 @@ namespace LogFilterWeb.Models.Domain
         public IDictionary<string, string> UnknownProperties
         {
             get { 
-                return _additionalData.ToDictionary(keySelector: x => x.Key, 
+                return _additionalData?.ToDictionary(keySelector: x => x.Key, 
                     elementSelector: x => x.Value.ToString());
             }
         }
