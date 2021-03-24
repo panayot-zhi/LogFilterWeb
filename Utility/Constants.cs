@@ -52,6 +52,33 @@ namespace LogFilterWeb.Utility
 
         public static readonly string[] SUOSConfigurations = { SUOSDefaultConfig, SUOSBusterConfig, SUOSOtpConfig };
 
+        /// <summary>
+        /// sucfOnlineSessionStart
+        /// </summary>
+        public const string SUOSSessionStartServiceName = "sucfOnlineSessionStart";
+
+        /// <summary>
+        /// sendInvoice
+        /// </summary>
+        public const string SUOSSendInvoiceServiceName = "sendInvoice";
+
+        /// <summary>
+        /// getOrderStatus
+        /// </summary>
+        public const string SUOSGetOrderStatusServiceName = "getOrderStatus";
+
+        /// <summary>
+        /// getOrderInfo
+        /// </summary>
+        public const string SUOSGetOrderInfoServiceName = "getOrderInfo";
+
+        /// <summary>
+        /// getCoeff
+        /// </summary>
+        public const string SUOSGetCoeffServiceName = "getCoeff";
+
+        public static readonly string[] SUOSOtpServiceNames = { SUOSGetCoeffServiceName, SUOSGetOrderInfoServiceName, SUOSGetOrderStatusServiceName, SUOSSendInvoiceServiceName, SUOSSessionStartServiceName };
+
 
 
         /// <summary>

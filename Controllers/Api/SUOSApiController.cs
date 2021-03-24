@@ -48,7 +48,8 @@ namespace LogFilterWeb.Controllers.Api
             dynamic meta = new ExpandoObject();
 
             var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
-            var data = SUOSService.GetUserQueryData(cookieData, serviceName, ref meta);
+            var fullServiceName = serviceName?.ToLowerInvariant() + "requests";
+            var data = SUOSService.GetUserQueryData(cookieData, fullServiceName, ref meta);
             var query = data.AsParallel();
 
             return new

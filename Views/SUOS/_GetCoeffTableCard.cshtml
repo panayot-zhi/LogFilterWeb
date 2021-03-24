@@ -10,7 +10,7 @@
                 <i class="now-ui-icons loader_gear"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right"> @* TODO: Extract service name as a constant *@
-                <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = "getcoeffrequests" })" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetCoeffServiceName })" target="_blank">Get JSON</a>
 
                 <a class="dropdown-item text-danger refresh" href="#">Refresh Data</a>
             </div>
@@ -105,7 +105,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetUsersData", "SUOSApi", new { serviceName = "getcoeffrequests" })',
+                url: '@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetCoeffServiceName })',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);
