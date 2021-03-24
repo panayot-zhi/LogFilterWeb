@@ -25,12 +25,12 @@ namespace LogFilterWeb.Controllers.Api
 
             var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
             var data = SUOSService.GetSummaryRecords(cookieData, config, ref meta);
-            //var query = data.AsParallel();
+            var query = data.AsParallel();
 
             return new
             {
                 Meta = meta,
-                Results = data.GroupBy(keySelector: x => x.MachineName, 
+                Results = query.GroupBy(keySelector: x => x.MachineName, 
                     resultSelector: (machineName, groupByMachine) =>
                     {
                         return new

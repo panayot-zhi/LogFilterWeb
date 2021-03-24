@@ -37,6 +37,7 @@ namespace LogFilterWeb.Services
             meta.from = from;
             meta.fromCache = fromCache;
             meta.config = config;
+            meta.records = summaryRecords.FirstOrDefault()?.Filters.Length;
             meta.files = summaryRecords.Select(x => x.InputFile);
             meta.to = to;
 

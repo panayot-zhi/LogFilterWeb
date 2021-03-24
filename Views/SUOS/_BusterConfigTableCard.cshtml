@@ -32,11 +32,11 @@
                         </th>
                         @foreach (var server in Model.MonitoredServers)
                         {
-                            <th class="text-left" style="width: 10%">
+                            <th class="text-right" style="width: 10%">
                                 /@server/
                             </th>
                         }
-                        <th class="text-left" style="width: 10%">
+                        <th class="text-right" style="width: 10%">
                             Total
                         </th>
                     </tr>
@@ -69,6 +69,12 @@
                 <div class="dropdown-menu dropdown-menu-left">
                 </div>
             </div>
+            
+            <div class="col-sm-12 text-right">
+                <a class="show-more" href="#">
+                    <i class="now-ui-icons loader_refresh"></i> Show 5 more
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -100,7 +106,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSBusterConfig })',
+                url: '@Url.Action("GetSummariesData", "SUOSApi", new {config = Constants.SUOSBusterConfig})',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);
@@ -124,10 +130,15 @@
                 card.find('.card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${file}</a>`);
             }
 
-            card.find('.card-footer .stats-info').text(`
-                            Consolidation summary from ${metaData.files.length} files
+            var statsInfo = card.find('.card-footer .stats-info');
+
+            statsInfo.text(`Consolidation summary from ${metaData.files.length} files
                             in the period from ${moment(metaData.from).format('yyyy-MM-DD')}
                             to ${moment(metaData.to).format('yyyy-MM-DD')}.`);
+
+            statsInfo.append(
+                $('<b>').text(`Total of ${metaData.records} records.`).addClass("pull-right")
+            );
         }
 
         function updateData(tableData) {
@@ -174,7 +185,8 @@
 
                 // regular row template
                 // TODO: Minify this by hand
-                tableBody.append(`<tr>
+                // TODO: Extract this initial row display count as const
+                tableBody.append(`<tr class="${i < 10 ? "" : "d-none"}">
                             <td class="text-center">
                                     <div class="form-check">
                                         <label class="form-check-label">
@@ -259,6 +271,17 @@
             function(e) {
                 e.preventDefault();
                 updateData();
+            });
+
+        card.on('click',
+            "a.show-more",
+            function(e) {
+                e.preventDefault();
+
+                var hiddenElements = card.find("tr.d-none");
+                if (hiddenElements.length) {
+                    hiddenElements.slice(0, 5).removeClass("d-none");
+                }
             });
 
         return {
