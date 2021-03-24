@@ -11,8 +11,8 @@ namespace LogFilterWeb.Models.Domain
 
         public string FullName { get; set; }
 
-        public string ServerName { get; set; }
+        public string MachineName { get; set; }
 
-        public IEnumerable<UserQueryRecord> Records { get; set; }
+        public IEnumerable<UserQueryRecordBase> Records { get; set; }
     }
 }

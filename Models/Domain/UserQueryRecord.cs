@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 
 namespace LogFilterWeb.Models.Domain
 {
-    public class UserQueryRecord
+    public class UserQueryRecordBase
     {
-        public int Count { get; set; }
-
-        public IEnumerable<QueryRecord> Queries { get; set; }
-
         public string User { get; set; }
+
+        public int Count { get; set; }
+    }
+
+    public class UserQueryRecordExtended : UserQueryRecordBase
+    {
+        public IEnumerable<QueryRecord> Queries { get; set; }
     }
 }
