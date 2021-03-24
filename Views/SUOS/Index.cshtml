@@ -127,6 +127,11 @@
 
 <div class="content">
     <div class="row">
+        <div class="col-md-4">
+            @await Html.PartialAsync("_GetCoeffTableCard", Model)
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-5 offset-md-1">
             @await Html.PartialAsync("_DefaultConfigTableCard", Model)
         </div>
@@ -244,11 +249,17 @@
             initializeDateRangePicker(modelStartDate, modelEndDate);
             initializeCurrentServersPicker();           
 
+            var getCoeffTable = window.constructGetCoeffTable();
+
             var defaultConfigTable = window.constructDefaultConfigTable();
             var busterConfigTable = window.constructBusterConfigTable();
 
+            getCoeffTable.updateData();
+
             defaultConfigTable.updateData();
             busterConfigTable.updateData();
+
+
         });
     </script>
 }
