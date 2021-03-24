@@ -38,7 +38,31 @@ namespace LogFilterWeb.Controllers.Api
                             Machine = machineName,
                             Filters = FilesHelper.Combine(groupByMachine).Filters
                         };
-                    } )
+                    })
+            };
+        }
+
+        [HttpGet]
+        public dynamic GetUsersData(string serviceName)
+        {
+            dynamic meta = new ExpandoObject();
+
+            var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
+            var data = SUOSService.GetUserQueryData(cookieData, serviceName, ref meta);
+            var query = data.AsParallel();
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machineName, groupByServer) =>
+                    {
+                        return new
+                        {
+                            Machine = machineName,
+                            Records = groupByServer.SelectMany(x => x.Records)
+                        };
+                    })
             };
         }
     }

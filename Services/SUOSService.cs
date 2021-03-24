@@ -46,5 +46,39 @@ namespace LogFilterWeb.Services
 
             return summaryRecords;
         }
+
+        public static IEnumerable<UserQueryFile> GetUserQueryData(SUOS cookieData, string serviceName, ref dynamic meta)
+        {
+            meta.begin = DateTime.Now.ToLocalTime();
+
+            var activeServers = cookieData.MonitoredServers;
+            var from = cookieData.StartDate.Date;
+            var to = cookieData.EndDate.Date;
+
+            bool fromCache;
+            var suosRoute = FilesHelper.GetSUOSRoute(Constants.SUOSDefaultConfig);
+            var queryFiles = FilesHelper.GetFilesFromDirectory(new DirectoryInfo(suosRoute), $"{serviceName}.json", out fromCache);
+
+            var filesInRange = queryFiles.Where(x => // default/machineName/yyyy-MM-dd/service.json
+                x.Directory?.Parent != null &&
+                activeServers.Contains(x.Directory.Parent.Name) &&
+                FilesHelper.ToDateTime(x.Directory.Name) >= from.Date &&
+                FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
+            );
+
+            var userQueryFiles = filesInRange.Select(FilesHelper.ReadUserQueryFiles).ToList();
+
+            meta.from = from;
+            meta.fromCache = fromCache;
+            meta.config = Constants.SmartUCFDefaultConfig;
+            meta.files = userQueryFiles.Select(x => x.FullName);
+            meta.to = to;
+
+            meta.end = DateTime.Now.ToLocalTime();
+            meta.elapsed = (meta.end - meta.begin).ToString("c");
+
+            return userQueryFiles;
+        }
+
     }
 }
