@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Utility;
+using NUglify.Helpers;
 
 namespace LogFilterWeb.Services
 {
@@ -66,10 +67,11 @@ namespace LogFilterWeb.Services
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
 
-            var userQueryFiles = filesInRange.Select(FilesHelper.ReadUserQueryFiles).ToList();
+            var userQueryFiles = filesInRange.Select(x => FilesHelper.ReadUserQueryFiles(x, extended: false)).ToList();
 
             meta.from = from;
             meta.fromCache = fromCache;
+            meta.records = userQueryFiles.SelectMany(x => x.Records).DistinctBy(x => x.User).Count();
             meta.config = Constants.SmartUCFDefaultConfig;
             meta.files = userQueryFiles.Select(x => x.FullName);
             meta.to = to;
