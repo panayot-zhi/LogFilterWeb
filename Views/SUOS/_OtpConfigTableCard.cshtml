@@ -70,6 +70,11 @@
                 </div>
             </div>
         </div>
+        <div class="row stats text-right">
+            <a class="show-more" href="#">
+                <i class="now-ui-icons loader_refresh"></i> Show 5 more
+            </a>
+        </div>
     </div>
 </div>
 
@@ -114,20 +119,30 @@
             card.find('.getLogsZip input[name="filePaths"]').remove();
             card.find('.card-footer .stats .dropup .dropdown-menu a').remove();
 
-            for (var i = 0; i < metaData.files.length; i++) {
+            let i;
+            for (i = 0; i < metaData.logFiles.length; i++) {
 
-                var file = metaData.files[i];
+                var logFile = metaData.logFiles[i];
 
-                card.find(".getCsvZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
-                card.find(".getLogsZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
+                card.find(".getLogsZip").append(`<input type="hidden" name="filePaths" value="${logFile}">`);
+                card.find('.card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${logFile}</a>`);
+            }
 
-                card.find('.card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${file}</a>`);
+            for (i = 0; i < metaData.summaryFiles.length; i++) {
+
+                var summaryFile = metaData.summaryFiles[i];
+
+                card.find(".getSummariesZip").append(`<input type="hidden" name="filePaths" value="${summaryFile}">`);
             }
             
             card.find('.card-footer .stats-info').text(`
-                            Consolidation summary from ${metaData.files.length} files
+                            Consolidation summary from ${metaData.logFiles.length} files
                             in the period from ${moment(metaData.from).format('yyyy-MM-DD')}
                             to ${moment(metaData.to).format('yyyy-MM-DD')}.`);
+
+            card.find('.card-footer .stats.text-right').append(
+                $('<b>').text(`Total of ${metaData.records} records.`).addClass("pull-left")
+            );
         }
 
         function updateData(tableData) {
