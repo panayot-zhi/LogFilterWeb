@@ -77,6 +77,48 @@ namespace LogFilterWeb.Utility
             return ReadStopWatchRecords(fileInfo.FullName);
         }
 
+        /// <summary>
+        /// Reads a stopwatch csv file into a record set.
+        /// This method uses cache to store the result records and uses the hashed file name as key.
+        /// </summary>
+        /// <param name="filePath">The full file path to the stopwatch csv file. This will be hashed and used as a cache key.</param>
+        /// <returns>Enumerated stopwatch records, could be from cache.</returns>
+        public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
+        {
+            var machineName = GetSmartUCFMachineName(filePath, out _);
+
+            var key = Hash(filePath);
+
+            // check cache for entry
+            var cacheEntry = Cache.Get<IEnumerable<StopwatchRecord>>(key);
+            if (cacheEntry != null && UseCache)
+            {
+                // if we're allowed to use the cache,
+                // and there is an entry retrieved
+                return cacheEntry;
+            }
+
+            // else retrieve the data again
+            var result = File.ReadLines(filePath)
+                .Select(line => line.Split(',')
+                    .Select(x => x.Trim()).ToArray())
+                .Select(columns => new StopwatchRecord()
+                {
+                    Date = ToDateTime(columns[0]),
+                    MachineName = machineName,
+                    User = columns[1],
+                    ListName = columns[2],
+                    NumberOfRows = int.Parse(columns[3]),
+                    RetrieveMilliseconds = int.Parse(columns[4])
+
+                }).ToList();
+
+            // refresh the record data in cache
+            Cache.Set(key, result, TimeSpan.FromHours(1));
+
+            return result;
+        }
+
         public static SummaryFile ReadSummary(FileInfo fileInfo)
         {
             return ReadSummary(fileInfo.FullName);
@@ -92,6 +134,26 @@ namespace LogFilterWeb.Utility
 
             return summary;
         }
+
+        public static UserQueryFile ReadUserQueryFiles(FileInfo fileInfo)
+        {
+            var fullFileName = fileInfo.FullName;
+            var directoryName = fileInfo.Directory.Name;
+
+            return new UserQueryFile()
+            {
+                FullName = fullFileName,
+                Date = ToDateTime(directoryName),
+                MachineName = GetSmartUCFMachineName(fullFileName, out _),
+                Records = ReadUserQueryRecords(fullFileName)
+            };
+        }
+
+        public static IEnumerable<UserQueryRecordBase> ReadUserQueryRecords(string filePath)
+        {
+            return ReadJson<IEnumerable<UserQueryRecordExtended>>(filePath).OrderByDescending(x => x.Count);
+        }
+
 
         public static SummaryFile Combine(IEnumerable<SummaryFile> list)
         {
@@ -176,75 +238,6 @@ namespace LogFilterWeb.Utility
             };
         }
 
-        public static string GetMinProcessTimestamp(string a, string b)
-        {
-            return ToDateTime(a) < ToDateTime(b) ? a : b;
-        }
-
-        /// <summary>
-        /// Reads a stopwatch csv file into a record set.
-        /// This method uses cache to store the result records and uses the hashed file name as key.
-        /// </summary>
-        /// <param name="filePath">The full file path to the stopwatch csv file. This will be hashed and used as a cache key.</param>
-        /// <returns>Enumerated stopwatch records, could be from cache.</returns>
-        public static IEnumerable<StopwatchRecord> ReadStopWatchRecords(string filePath)
-        {
-            var machineName = GetSmartUCFMachineName(filePath, out _);
-
-            var key = Hash(filePath);
-
-            // check cache for entry
-            var cacheEntry = Cache.Get<IEnumerable<StopwatchRecord>>(key);
-            if (cacheEntry != null && UseCache)
-            {
-                // if we're allowed to use the cache,
-                // and there is an entry retrieved
-                return cacheEntry;
-            }
-
-            // else retrieve the data again
-            var result = File.ReadLines(filePath)
-                .Select(line => line.Split(',')
-                    .Select(x => x.Trim()).ToArray())
-                .Select(columns => new StopwatchRecord()
-                {
-                    Date = ToDateTime(columns[0]),
-                    MachineName = machineName,
-                    User = columns[1],
-                    ListName = columns[2],
-                    NumberOfRows = int.Parse(columns[3]),
-                    RetrieveMilliseconds = int.Parse(columns[4])
-
-                }).ToList();
-
-            // refresh the record data in cache
-            Cache.Set(key, result, TimeSpan.FromHours(1));
-
-            return result;
-        }
-
-        public static UserQueryFile ReadUserQueryFiles(FileInfo fileInfo, bool extended = false)
-        {
-            return ReadUserQueryFiles(fileInfo.FullName, extended);
-        }
-
-        public static UserQueryFile ReadUserQueryFiles(string filePath, bool extended = false)
-        {
-            var machineName = GetSUOSMachineName(filePath, out _);
-
-            return new UserQueryFile()
-            {
-                Date = DateTime.Now,
-                FullName = filePath,
-                MachineName = machineName,
-                Records = ReadUserQueryRecords(filePath)
-            };
-        }
-
-        public static IEnumerable<UserQueryRecordBase> ReadUserQueryRecords(string filePath)
-        {
-            return ReadJson<IEnumerable<UserQueryRecordExtended>>(filePath).OrderByDescending(x => x.Count);
-        }
 
         private static T ReadJson<T>(string filePath)
         {
@@ -266,6 +259,11 @@ namespace LogFilterWeb.Utility
             Cache.Set(key, result, TimeSpan.FromHours(1));
 
             return result;
+        }
+
+        private static string GetMinProcessTimestamp(string a, string b)
+        {
+            return ToDateTime(a) < ToDateTime(b) ? a : b;
         }
 
         private static string Hash(string input)
@@ -345,6 +343,18 @@ namespace LogFilterWeb.Utility
             return Path.Combine(paths.ToArray());
         }
 
+        public static string GetSmartUCFMachineName(string fullFilePath, out string config)
+        {
+            var supportedMachines = string.Join("|", Constants.SmartUCFMachines);
+            var targetFilePath = fullFilePath.Replace(Constants.SmartUCFRoot, string.Empty);
+
+            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
+
+            config = machineFinderRegex.Groups["Config"].Value;
+
+            return machineFinderRegex.Groups["Machine"].Value;
+        }
+
         public static string GetSmartUCFRoute(string config = null, string machine = null, string date = null)
         {
             var paths = new List<string>()
@@ -368,18 +378,6 @@ namespace LogFilterWeb.Utility
             }
 
             return Path.Combine(paths.ToArray());
-        }
-
-        public static string GetSmartUCFMachineName(string fullFilePath, out string config)
-        {
-            var supportedMachines = string.Join("|", Constants.SmartUCFMachines);
-            var targetFilePath = fullFilePath.Replace(Constants.SmartUCFRoot, string.Empty);
-
-            var machineFinderRegex = Regex.Match(targetFilePath, $"(?<Config>\\w+)\\\\(?<Machine>({supportedMachines}))\\\\");
-
-            config = machineFinderRegex.Groups["Config"].Value;
-
-            return machineFinderRegex.Groups["Machine"].Value;
         }
 
         public static byte[] ZipSmartUCFCsvFiles(string[] filePaths)
