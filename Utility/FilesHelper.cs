@@ -384,14 +384,6 @@ namespace LogFilterWeb.Utility
             return machineFinderRegex.Groups["Machine"].Value;
         }
 
-        public static string GetSmartUCFLogFilePath(string fullFilePath)
-        {
-            var machineName = GetSmartUCFMachineName(fullFilePath, out _);
-            var fileName = new FileInfo(fullFilePath).Directory.Name + ".log";
-
-            return Path.Combine(Constants.SmartUCFLogsRoot, machineName, fileName);
-        }
-
         public static byte[] ZipSmartUCFCsvFiles(string[] filePaths)
         {
             using var memory = new MemoryStream();
@@ -402,11 +394,35 @@ namespace LogFilterWeb.Utility
                     var fileInfo = new FileInfo(filePath);
                     var directoryName = fileInfo.Directory.Name;
                     var machineName = GetSmartUCFMachineName(filePath, out _);
+
                     zip.Add(filePath, $"{directoryName}/file_{machineName}.csv");
                 }
             }
 
             return memory.ToArray();
+        }
+
+        public static byte[] ZipSUOSSummaryFiles(string[] filePaths)
+        {
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
+            {
+                foreach (var filePath in filePaths)
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    var directoryName = fileInfo.Directory.Name;
+                    var machineName = fileInfo.Directory.Parent.Name;
+
+                    zip.Add(filePath, $"{machineName}/{directoryName}/{fileInfo.Name}");
+                }
+            }
+
+            return memory.ToArray();
+        }
+
+        public static byte[] ZipSUOSServiceJsonFiles(string[] filePaths)
+        {
+            throw new NotImplementedException();
         }
 
         public static byte[] ZipSmartUCFLogFiles(string[] filePaths)
@@ -416,11 +432,29 @@ namespace LogFilterWeb.Utility
             {
                 foreach (var filePath in filePaths)
                 {
-                    var logFilePath = GetSmartUCFLogFilePath(filePath);
-
+                    var machineName = GetSmartUCFMachineName(filePath, out _);
+                    var fileName = new FileInfo(filePath).Directory.Name + ".log";
+                    var logFilePath = Path.Combine(Constants.SmartUCFLogsRoot, machineName, fileName);
                     var fileInfo = new FileInfo(logFilePath);
-                    var machineName = fileInfo.Directory.Name;
+
                     zip.Add(logFilePath, $"{machineName}/{fileInfo.Name}");
+                }
+            }
+
+            return memory.ToArray();
+        }
+
+        public static byte[] ZipSUOSLogFiles(string[] filePaths)
+        {
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
+            {
+                foreach (var filePath in filePaths)
+                {
+                    var machineName = GetSUOSMachineName(filePath, out _);
+                    var fileInfo = new FileInfo(filePath);
+
+                    zip.Add(filePath, $"{machineName}/{fileInfo.Name}");
                 }
             }
 
