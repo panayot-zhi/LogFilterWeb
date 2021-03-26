@@ -31,7 +31,8 @@ namespace LogFilterWeb.Services
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
 
-            var summaryRecords = filesInRange.Select(FilesHelper.ReadSummary).ToList();
+            var filesInRangeArray = filesInRange as FileInfo[] ?? filesInRange.ToArray();
+            var summaryRecords = filesInRangeArray.Select(FilesHelper.ReadSummary).ToList();
             //var summaryAggregate = FilesHelper.Combine(summaryRecords);
             //summaryRecords.Add(summaryAggregate);
 
@@ -39,7 +40,8 @@ namespace LogFilterWeb.Services
             meta.fromCache = fromCache;
             meta.config = config;
             meta.records = summaryRecords.FirstOrDefault()?.Filters.Length;
-            meta.files = summaryRecords.Select(x => x.InputFile);
+            meta.logFiles = summaryRecords.Select(x => x.InputFile);
+            meta.summaryFiles = filesInRangeArray.Select(x => x.FullName);
             meta.to = to;
 
             meta.end = DateTime.Now.ToLocalTime();
