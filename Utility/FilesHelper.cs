@@ -233,17 +233,11 @@ namespace LogFilterWeb.Utility
                 Date = DateTime.Now,
                 FullName = filePath,
                 MachineName = machineName,
-                Records = extended ? ReadUserQueryRecordsExtended(filePath) 
-                    : ReadUserQueryRecords(filePath)
+                Records = ReadUserQueryRecords(filePath)
             };
         }
 
         public static IEnumerable<UserQueryRecordBase> ReadUserQueryRecords(string filePath)
-        {
-            return ReadJson<IEnumerable<UserQueryRecordBase>>(filePath).OrderByDescending(x => x.Count);
-        }
-
-        public static IEnumerable<UserQueryRecordExtended> ReadUserQueryRecordsExtended(string filePath)
         {
             return ReadJson<IEnumerable<UserQueryRecordExtended>>(filePath).OrderByDescending(x => x.Count);
         }
