@@ -227,7 +227,7 @@
                 var lastRetrievedList = listName;
                 listName = null;
 
-                if ($(this.hasClass('refresh'))) {
+                if ($(this).hasClass('refresh')) {
                     updateData(lastRetrievedList);
                     return;
                 }
