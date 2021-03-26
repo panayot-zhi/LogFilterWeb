@@ -411,16 +411,30 @@ namespace LogFilterWeb.Utility
                     var directoryName = fileInfo.Directory.Name;
                     var machineName = fileInfo.Directory.Parent.Name;
 
-                    zip.Add(filePath, $"{machineName}/{directoryName}/{fileInfo.Name}");
+                    zip.Add(filePath, $"{directoryName}/summary_{machineName}.json");
                 }
             }
 
             return memory.ToArray();
         }
 
-        public static byte[] ZipSUOSServiceJsonFiles(string[] filePaths)
+        public static byte[] ZipSUOSServiceJsonFiles(string[] filePaths, string fullServiceName)
         {
-            throw new NotImplementedException();
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
+            {
+                foreach (var filePath in filePaths)
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    var directoryName = fileInfo.Directory.Name;
+                    var machineName = fileInfo.Directory.Parent.Name;
+
+                    var targetFilePath = filePath.Replace(fileInfo.Name, $"{fullServiceName}.json");
+                    zip.Add(targetFilePath, $"{directoryName}/{fullServiceName}_{machineName}.json");
+                }
+            }
+
+            return memory.ToArray();
         }
 
         public static byte[] ZipSmartUCFLogFiles(string[] filePaths)
@@ -436,6 +450,25 @@ namespace LogFilterWeb.Utility
                     var fileInfo = new FileInfo(logFilePath);
 
                     zip.Add(logFilePath, $"{machineName}/{fileInfo.Name}");
+                }
+            }
+
+            return memory.ToArray();
+        }
+
+        public static byte[] ZipSUOSFilteredLogFiles(string[] filePaths)
+        {
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
+            {
+                foreach (var filePath in filePaths)
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    var directoryName = fileInfo.Directory.Name;
+                    var machineName = fileInfo.Directory.Parent.Name;
+
+                    var targetFilePath = filePath.Replace(fileInfo.Name, $"[filtered]-{directoryName}.log");
+                    zip.Add(targetFilePath, $"{directoryName}/filtered_{machineName}.log");
                 }
             }
 

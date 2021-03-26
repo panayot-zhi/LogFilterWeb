@@ -11,6 +11,14 @@
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right">
                 <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSBusterConfig })" target="_blank">Get JSON</a>
+                
+                <form class="getSummariesZip" asp-action="GetSummariesZip" target="_blank">
+                    <input class="dropdown-item" type="submit" value="Get Summaries Zip" />
+                </form>
+                
+                <form class="getFilteredLogsZip" asp-action="GetFilteredLogsZip" target="_blank">
+                    <input class="dropdown-item" type="submit" value="Get Filtered Logs Zip" />
+                </form>
 
                 <a class="dropdown-item text-danger refresh" href="#">Refresh Data</a>
             </div>
@@ -133,6 +141,7 @@
                 var summaryFile = metaData.summaryFiles[i];
 
                 card.find(".getSummariesZip").append(`<input type="hidden" name="filePaths" value="${summaryFile}">`);
+                card.find(".getFilteredLogsZip").append(`<input type="hidden" name="filePaths" value="${summaryFile}">`);
             }
 
             var statsInfo = card.find('.card-footer .stats-info');
