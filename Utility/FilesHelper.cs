@@ -159,7 +159,11 @@ namespace LogFilterWeb.Utility
         public static UserQueryFile Combine(UserQueryFile source, UserQueryFile other)
         {
             var resultRecords = ObjectCloner.JsonCopy(source.Records).ToList();
-            resultRecords.AddRange(other.Records.Except(source.Records));
+            var differences = other.Records.Where(otherRecord =>
+                resultRecords.All(sourceRecord => sourceRecord.User != otherRecord.User));
+
+            // resultRecords.AddRange(other.Records.Except(source.Records));
+            resultRecords.AddRange(differences);
 
             foreach (var resultRecord in resultRecords)
             {
