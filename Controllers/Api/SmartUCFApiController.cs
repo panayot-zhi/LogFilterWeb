@@ -28,7 +28,7 @@ namespace LogFilterWeb.Controllers.Api
                 query = query.Where(x => x.ListName == listName);
             }
 
-            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
             {
@@ -98,7 +98,7 @@ namespace LogFilterWeb.Controllers.Api
             var query = data.AsParallel();
 
             query = query.Where(x => x.ListName == listName);
-            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
             {
@@ -176,7 +176,7 @@ namespace LogFilterWeb.Controllers.Api
             meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
 
             query = query.Where(x => x.ListName == listName);
-            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
             {
@@ -246,7 +246,7 @@ namespace LogFilterWeb.Controllers.Api
             meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
 
             query = query.Where(x => x.ListName == listName);
-            query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
 
             return new
             {
