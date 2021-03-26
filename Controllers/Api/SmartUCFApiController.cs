@@ -159,76 +159,6 @@ namespace LogFilterWeb.Controllers.Api
         }
 
         [HttpGet]
-        public dynamic GetStopwatchServerDataByDay(string listName)
-        {
-            if (string.IsNullOrWhiteSpace(listName))
-            {
-                throw new ArgumentNullException(nameof(listName));
-            }
-
-            dynamic meta = new ExpandoObject();
-
-            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
-            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
-            var query = data.AsParallel();
-
-            meta.listName = listName;
-            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
-
-            query = query.Where(x => x.ListName == listName);
-            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
-
-            return new
-            {
-                Meta = meta,
-                Results = query.GroupBy(keySelector: x => x.MachineName,
-                    resultSelector: (machine, groupByMachine) =>
-                    {
-                        var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
-
-                        var result = new List<dynamic>();
-                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
-                        {
-                            var dailyRecords = groupByMachineArray.Where(x => x.Date == day).ToArray();
-
-                            if (dailyRecords.Length > 0)
-                            {
-                                result.Add(new
-                                {
-                                    Date = day,
-                                    TotalRecords = dailyRecords.Length,
-                                    TotalRowsRetrieved = dailyRecords.Sum(x => x.NumberOfRows),
-                                    MaxRowsRetrieved = dailyRecords.Max(x => x.NumberOfRows),
-                                    AvgRowsRetrieved = dailyRecords.Average(x => x.NumberOfRows),
-                                    MaxRetrieveTime = dailyRecords.Max(x => x.RetrieveMilliseconds),
-                                    AvgRetrieveTime = dailyRecords.Average(x => x.RetrieveMilliseconds),
-                                });
-                            }
-                            else
-                            {
-                                result.Add(new
-                                {
-                                    Date = day,
-                                    TotalRecords = 0,
-                                    TotalRowsRetrieved = 0,
-                                    MaxRowsRetrieved = 0,
-                                    MaxRetrieveTime = 0,
-                                    AvgRetrieveTime = 0
-                                });
-                            }
-                        }
-
-                        return new
-                        {
-                            Name = machine,
-                            Records = result
-                        };
-
-                    }).OrderBy(x => x.Name)
-            };
-        }
-
-        [HttpGet]
         public dynamic GetStopwatchUsersData(string listName)
         {
             if (string.IsNullOrWhiteSpace(listName))
@@ -303,5 +233,76 @@ namespace LogFilterWeb.Controllers.Api
                     }).OrderByDescending(x => x.TotalRowsRetrieved).Take(10)
             };
         }
+
+        [HttpGet]
+        public dynamic GetStopwatchServerDataByDay(string listName)
+        {
+            if (string.IsNullOrWhiteSpace(listName))
+            {
+                throw new ArgumentNullException(nameof(listName));
+            }
+
+            dynamic meta = new ExpandoObject();
+
+            var cookieData = this.ReadCookie<SmartUCF>(SmartUCF.CookieName);
+            var data = SmartUCFService.GetStopwatchRecords(cookieData, ref meta);
+            var query = data.AsParallel();
+
+            meta.listName = listName;
+            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
+
+            query = query.Where(x => x.ListName == listName);
+            // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machine, groupByMachine) =>
+                    {
+                        var groupByMachineArray = groupByMachine as StopwatchRecord[] ?? groupByMachine.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            var dailyRecords = groupByMachineArray.Where(x => x.Date == day).ToArray();
+
+                            if (dailyRecords.Length > 0)
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = dailyRecords.Length,
+                                    TotalRowsRetrieved = dailyRecords.Sum(x => x.NumberOfRows),
+                                    MaxRowsRetrieved = dailyRecords.Max(x => x.NumberOfRows),
+                                    AvgRowsRetrieved = dailyRecords.Average(x => x.NumberOfRows),
+                                    MaxRetrieveTime = dailyRecords.Max(x => x.RetrieveMilliseconds),
+                                    AvgRetrieveTime = dailyRecords.Average(x => x.RetrieveMilliseconds),
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    TotalRecords = 0,
+                                    TotalRowsRetrieved = 0,
+                                    MaxRowsRetrieved = 0,
+                                    MaxRetrieveTime = 0,
+                                    AvgRetrieveTime = 0
+                                });
+                            }
+                        }
+
+                        return new
+                        {
+                            Name = machine,
+                            Records = result
+                        };
+
+                    }).OrderBy(x => x.Name)
+            };
+        }
+
     }
 }
