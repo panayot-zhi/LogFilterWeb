@@ -38,7 +38,8 @@ namespace LogFilterWeb.Controllers.Api
                             Machine = machineName,
                             Filters = FilesHelper.Combine(groupByMachine).Filters
                         };
-                    }).OrderByDescending(x => x.Machine)
+
+                    }).OrderBy(x => x.Machine)
             };
         }
 
@@ -64,7 +65,8 @@ namespace LogFilterWeb.Controllers.Api
                             Records = FilesHelper.Combine(groupByServer).Records
                                 .OrderByDescending(x => x.Count)
                         };
-                    }).OrderByDescending(x => x.Machine)
+
+                    }).OrderBy(x => x.Machine)
             };
         }
     }
