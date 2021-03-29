@@ -1,0 +1,241 @@
+﻿<div id="userDailyUsageHeaderChartPanel" class="panel-header panel-header-lg">
+    <div id="userDailyUsageHeaderChartLoader">
+        <div class="hrc-spinner text-white">
+            <div class="bounce1 bg-white"></div>
+            <div class="bounce2 bg-white"></div>
+            <div class="bounce3 bg-white"></div>
+            Loading
+        </div>
+    </div>
+    <canvas id="userDailyUsageHeaderChart"></canvas>
+</div>
+
+<script>
+    function constructUserDailyUsageHeaderChart() {
+        
+        var chart = null;
+        var chartFill = null;
+
+        var currentlyDisplaying = null;
+
+        var canvas = $("#userDailyUsageHeaderChart");
+        var panel = $("#userDailyUsageHeaderChartPanel");
+        var loader = $("#userDailyUsageHeaderChartLoader");
+
+        // NOTE: External elements
+        var title = $("#headerChartTitle");
+        var options = $("#headerChartOptions");
+
+        function formatData(raw) {           
+
+            if (!raw.length) {
+                console.warn("No data!");
+                return null;
+            }
+
+            var labels = raw[0].records.map(x => moment(x.date).format('MMM DD'));
+            var colors = raw.map((x) => availableColors[SUOSServers.indexOf(x.name)]);
+            var datasets = [];
+
+            for (var i = 0; i < raw.length; i++) {
+
+                var server = raw[i];
+
+                datasets.push({
+                    label: "Server S" + server.name,
+                    borderColor: colors[i],
+                    pointBorderColor: namedColors.white,
+                    pointBackgroundColor: colors[i],
+                    pointHoverBackgroundColor: colors[i],
+                    pointHoverBorderColor: namedColors.white,
+                    pointBorderWidth: 1,
+                    pointHoverRadius: 7,
+                    pointHoverBorderWidth: 2,
+                    pointRadius: 5,
+                    fill: true,                    
+                    borderWidth: 2,
+                    backgroundColor: chartFill,
+                    data: server.records.map((x) => x["count"])
+                });
+            }
+
+            return {
+                labels: labels,
+                datasets: datasets
+            }
+        }
+
+        function updateMeta(meta) {
+
+            var display = currentlyDisplaying;
+            if (display.startsWith("display_filter")) {
+
+
+            } else if (display.startsWith("display_user")) {
+
+                var normalizedId = display.replace("display_user_", "");
+                var serviceName = normalizedId.split("_")[0];
+                var targetUser = normalizedId.replace(serviceName + "_", "");
+            }
+
+            title.html(`${currentlyDisplaying}`);
+        }
+
+        function fetchData(display) {
+
+            canvas.hide();
+            loader.show();            
+            options.addClass("disabled");
+
+            currentlyDisplaying = display;
+            if (display.startsWith("display_filter")) {
+
+
+            } else if (display.startsWith("display_user")) {
+
+                var normalizedId = display.replace("display_user_", "");
+                var serviceName = normalizedId.split("_")[0];
+                var targetUser = normalizedId.replace(serviceName + "_", "");
+
+                $.ajax({
+                    url: '@Url.Action("GetUserDataByDay", "SUOSApi")' + `?serviceName=${serviceName}&user=${targetUser}`,
+                    success: function (r) {
+                        updateData(null, r.results);
+                        updateMeta(r.meta);                    
+                    }
+                });
+            }
+        }
+
+        function updateData(display, chartData) {
+
+            if (!display && !chartData) {
+                //showWarnNotification("Header chart cannot display historical data without a list selected. Please select a list from the table.");
+                console.log("Header chart cannot display historical data without a list selected. Please select a list from the table.");
+                return;
+            }
+
+            if (display === currentlyDisplaying) {
+                showInfoNotification("Header chart will skip data retrieval, because the list is the same as the one loaded before.");           
+                return;
+            }
+
+            var ctx = canvas[0].getContext("2d");
+            chartFill = drawBlueCanvasBackground(ctx);
+
+            if (!chartData) {
+                fetchData(display);
+                return;
+            }
+
+            canvas.show();
+            loader.hide();
+            options.removeClass("disabled");
+
+            // update
+            if (chart) {
+
+                var newData = formatData(chartData);
+                chart.data = newData;
+                chart.update();
+
+                panel.trigger('updated.headerChart.now-ui', [currentlyDisplaying, chartData]);
+
+                return;
+            }
+
+            // initialize
+            var initialData = formatData(chartData);
+            chart = new Chart(ctx,
+                {
+                    type: 'line',
+                    data: initialData,
+
+                    options: {
+                        layout: {
+                            padding: {
+                                left: 20,
+                                right: 60,
+                                top: 0,
+                                bottom: 0
+                            }
+                        },
+                        maintainAspectRatio: false,
+                        tooltips: {
+                            backgroundColor: '#fff',
+                            titleFontColor: '#333',
+                            bodyFontColor: '#666',
+                            bodySpacing: 4,
+                            xPadding: 12,
+                            mode: "nearest",
+                            intersect: 0,
+                            position: "nearest",
+                            enabled: true,
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    var label = data.datasets[tooltipItem.datasetIndex].label;
+                                    var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+
+                                    return '\t' + label + ' : ' + parseFloat(val).toLocaleString('bg');
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                fontColor: '#fff'
+                            },
+                            position: "bottom",                            
+                            display: true
+                        },
+                        scales: {
+                            yAxes: [
+                                {
+                                    ticks: {
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold",
+                                        beginAtZero: true,
+                                        maxTicksLimit: 5,
+                                        padding: 10,
+                                        callback: function(value, index, values) {
+                                            return nFormatter(value);
+                                        }
+                                    },
+                                    gridLines: {
+                                        drawTicks: true,
+                                        drawBorder: false,
+                                        display: true,
+                                        color: "rgba(255,255,255,0.1)",
+                                        zeroLineColor: "transparent"
+                                    }
+
+                                }
+                            ],
+                            xAxes: [
+                                {
+                                    gridLines: {
+                                        zeroLineColor: "transparent",
+                                        display: false
+
+                                    },
+                                    ticks: {
+                                        padding: 10,                                        
+                                        fontColor: "rgba(255,255,255,0.4)",
+                                        fontStyle: "bold"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                });
+
+            panel.trigger('constructed.headerChart.now-ui', [currentlyDisplaying, chartData]);
+        }
+
+        return {
+
+            currentlyDisplaying: currentlyDisplaying,
+
+            updateData: updateData
+        }
+    }
+</script>
