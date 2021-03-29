@@ -97,11 +97,6 @@
 
         var actions = $("#getCoeffTableCard > div.card-header > div > button");
 
-        function getSelectedLists() {
-            var selectedCheckboxes = table.find('tbody input[type="checkbox"][id^="display_"]:checked');
-            return selectedCheckboxes.toArray().map(x => x.id.replace("display_", ""));
-        }
-
         function getTableData() {
             return data;
         }
@@ -224,7 +219,7 @@
                             <td class="text-center">
                                     <div class="form-check">
                                         <label class="form-check-label">
-                                            <input id="display_${current.user}" class="form-check-input" type="checkbox">
+                                            <input id="display_user_@(Constants.SUOSGetCoeffServiceName)_${current.user}" class="form-check-input" type="checkbox">
                                             <span class="form-check-sign"></span>
                                         </label>
                                     </div>
@@ -286,19 +281,6 @@
                 table.trigger('updated.table.now-ui', [data]);
             });
 
-        table.on('click',
-            'input[type="checkbox"][id^=display_]',
-            function(e) {
-
-                var checkbox = $(e.target);
-                var selected = checkbox.is(":checked");
-                var listName = checkbox.attr("id").replace("display_", "");
-                var row = checkbox.closest("tr");
-                var index = row.index();
-
-                table.trigger('updated.table.now-ui', [data]);
-            });
-
         card.on('click',
             "a.refresh",
             function(e) {
@@ -324,7 +306,6 @@
             loaderRow: loader,
             actionsButton: actions,
 
-            getSelectedLists: getSelectedLists,
             getTableData: getTableData,
             updateData: updateData
         };
