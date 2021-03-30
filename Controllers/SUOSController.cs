@@ -52,6 +52,20 @@ namespace LogFilterWeb.Controllers
             };
         }
 
+        public IActionResult GetUserLogsZip(string[] filePaths, string user)
+        {
+            if (string.IsNullOrEmpty(user))
+            {
+                throw new ArgumentException(nameof(user));
+            }
+
+            var cookieData = this.ReadCookie<DateRange>(SUOS.CookieName);
+            return new FileContentResult(FilesHelper.ZipSUOSUserLogFiles(filePaths, user), "application/octet-stream")
+            {
+                FileDownloadName = $"{cookieData.StartDate:yyyy-MM-dd}_{user}_{cookieData.EndDate:yyyy-MM-dd}.zip"
+            };
+        }
+
         public IActionResult GetLogsZip(string[] filePaths)
         {
             var cookieData = this.ReadCookie<DateRange>(SUOS.CookieName);

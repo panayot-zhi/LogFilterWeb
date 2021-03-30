@@ -393,7 +393,7 @@ namespace LogFilterWeb.Utility
                     var directoryName = fileInfo.Directory.Name;
                     var machineName = GetSmartUCFMachineName(filePath, out _);
 
-                    zip.Add(filePath, $"{directoryName}/file_{machineName}.csv");
+                    zip.Add(filePath, $"{directoryName}/stopwatch_{machineName}.csv");
                 }
             }
 
@@ -486,6 +486,28 @@ namespace LogFilterWeb.Utility
                     var fileInfo = new FileInfo(filePath);
 
                     zip.Add(filePath, $"{machineName}/{fileInfo.Name}");
+                }
+            }
+
+            return memory.ToArray();
+        }
+
+        public static byte[] ZipSUOSUserLogFiles(string[] filePaths, string user)
+        {
+            using var memory = new MemoryStream();
+            using (var zip = new ZipArchive(memory, ZipArchiveMode.Create, false, Encoding.UTF8))
+            {
+                foreach (var filePath in filePaths)
+                {
+                    var fileInfo = new FileInfo(filePath);
+                    var directoryInfo = fileInfo.Directory;
+                    var directoryName = directoryInfo.Name;
+                    var machineName = directoryInfo.Parent.Name;
+
+                    var suosDirectoryRoute = GetSUOSRoute(Constants.SUOSOtpConfig, machineName, directoryName);
+
+                    var targetFilePath = Path.Combine(suosDirectoryRoute, "users", $"{user}.log");
+                    zip.Add(targetFilePath, $"{directoryName}/{user}_{machineName}.log");
                 }
             }
 
