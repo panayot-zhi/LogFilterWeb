@@ -99,7 +99,7 @@ namespace LogFilterWeb.Utility
             }
 
             // else retrieve the data again
-            var result = File.ReadLines(filePath)
+            var result = File.ReadLines(filePath, Encoding.UTF8)
                 .Select(line => line.Split(',')
                     .Select(x => x.Trim()).ToArray())
                 .Select(columns => new StopwatchRecord()
@@ -144,7 +144,7 @@ namespace LogFilterWeb.Utility
             {
                 FullName = fullFileName,
                 Date = ToDateTime(directoryName),
-                MachineName = GetSmartUCFMachineName(fullFileName, out _),
+                MachineName = GetSUOSMachineName(fullFileName, out _),
                 Records = ReadUserQueryRecords(fullFileName)
             };
         }
@@ -253,7 +253,7 @@ namespace LogFilterWeb.Utility
             }
 
             // else retrieve the data again
-            var result = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath));
+            var result = JsonConvert.DeserializeObject<T>(File.ReadAllText(filePath, Encoding.UTF8));
 
             // refresh the record data in cache
             Cache.Set(key, result, TimeSpan.FromHours(1));
