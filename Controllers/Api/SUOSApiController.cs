@@ -1,16 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
 using LogFilterWeb.Models.Cookie;
 using LogFilterWeb.Models.Domain;
 using LogFilterWeb.Services;
 using LogFilterWeb.Utility;
-using NUglify.JavaScript.Syntax;
 
 namespace LogFilterWeb.Controllers.Api
 {
@@ -67,6 +63,60 @@ namespace LogFilterWeb.Controllers.Api
                         };
 
                     }).OrderBy(x => x.Machine)
+            };
+        }
+
+        [HttpGet]
+        public dynamic GetUserDataByDay(string serviceName, string user)
+        {
+            dynamic meta = new ExpandoObject();
+
+            var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
+            var fullServiceName = serviceName?.ToLowerInvariant() + "requests";
+            var data = SUOSService.GetUserQueryData(cookieData, fullServiceName, ref meta, user);
+            var query = data.AsParallel();
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machine, groupByMachine) =>
+                    {
+                        var groupByMachineArray = groupByMachine as UserQueryFile[] ?? groupByMachine.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            if (groupByMachineArray
+                                .SingleOrDefault(x => x.Date == day)?
+                                .Records
+                                .SingleOrDefault() is UserQueryRecordExtended dailyUserRecord)
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    dailyUserRecord.User,
+                                    dailyUserRecord.Queries,
+                                    dailyUserRecord.Count
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    User = user,
+                                    Count = 0
+                                });
+                            }
+                        }
+
+                        return new
+                        {
+                            Name = machine,
+                            Records = result
+                        };
+                    })
             };
         }
     }
