@@ -50,7 +50,7 @@ namespace LogFilterWeb.Services
             return summaryRecords;
         }
 
-        public static IEnumerable<UserQueryFile> GetUserQueryData(SUOS cookieData, string serviceName, ref dynamic meta)
+        public static IEnumerable<UserQueryFile> GetUserQueryData(SUOS cookieData, string serviceName, ref dynamic meta, string user = null)
         {
             meta.begin = DateTime.Now.ToLocalTime();
 
@@ -69,7 +69,22 @@ namespace LogFilterWeb.Services
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
 
-            var userQueryFiles = filesInRange.Select(x => FilesHelper.ReadUserQueryFiles(x, extended: false)).ToList();
+            var forSpecificUser = !string.IsNullOrEmpty(user);
+            var userQueryFilesQuery = filesInRange.Select(FilesHelper.ReadUserQueryFiles);
+            if (forSpecificUser)
+            {
+                userQueryFilesQuery = userQueryFilesQuery.Select(x => new UserQueryFile()
+                {
+                    Date = x.Date,
+                    FullName = x.FullName,
+                    MachineName = x.MachineName,
+                    Records = x.Records
+                        .Where(r => r.User == user)
+                        .Cast<UserQueryRecordExtended>()
+                });
+            }
+
+            var userQueryFiles = userQueryFilesQuery.ToList();
 
             meta.from = from;
             meta.fromCache = fromCache;
@@ -83,6 +98,5 @@ namespace LogFilterWeb.Services
 
             return userQueryFiles;
         }
-
     }
 }
