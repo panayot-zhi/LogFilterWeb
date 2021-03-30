@@ -252,6 +252,18 @@
             panel.trigger('constructed.headerChart.now-ui', [currentlyDisplaying, chartData]);
         }
 
+        // EVENTS ->
+
+        options.on('click',
+            '.refresh',
+            function (e) {
+                e.preventDefault();
+
+                var lastDisplayItem = currentlyDisplaying;
+                currentlyDisplaying = null;
+                updateData(lastDisplayItem);
+            });
+
         return {
 
             currentlyDisplaying: currentlyDisplaying,
