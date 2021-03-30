@@ -1,19 +1,19 @@
 ﻿@model SUOS
 
-<div id="getCoeffTableCard" class="card">
+<div id="getOrderInfoTableCard" class="card">
     <div class="card-header ">
         <h5 class="card-category">List of users for service</h5>
-        <h4 class="card-title">@Constants.SUOSGetCoeffServiceName</h4>
+        <h4 class="card-title">@Constants.SUOSGetOrderInfoServiceName</h4>
         <p class="category">A ranking of the users with most requests to this service in the specified time period</p>
         <div class="dropdown">
             <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
                 <i class="now-ui-icons loader_gear"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right"> @* TODO: Extract service name as a constant *@
-                <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetCoeffServiceName })" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetOrderInfoServiceName })" target="_blank">Get JSON</a>
 
                 <form class="getServiceJsonZip" asp-action="GetServiceJsonZip" target="_blank">
-                    <input type="hidden" name="serviceName" value="@Constants.SUOSGetCoeffServiceName">
+                    <input type="hidden" name="serviceName" value="@Constants.SUOSGetOrderInfoServiceName">
                     <input class="dropdown-item" type="submit" value="Get Service JSON Zip" />
                 </form>
                 
@@ -28,7 +28,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table id="getCoeffTable" class="table">
+            <table id="getOrderInfoTable" class="table">
                 <thead class="text-primary text-right">
                     <tr>
                         <th class="text-right" style="width: 5%">
@@ -52,7 +52,7 @@
                     </tr>
                 </thead>
                 <tbody class="text-right">
-                    <tr id="getCoeffTableLoader">
+                    <tr id="getOrderInfoTableLoader">
                         <td colspan="6">
                             <div class="rect-spinner">
                                 <div class="rect1 bg-primary"></div>
@@ -89,15 +89,15 @@
 </div>
 
 <script>
-    function constructGetCoeffTable() {
+    function constructGetOrderInfoTable() {
 
         var data = null;
 
-        var table = $("#getCoeffTable");
-        var card = $("#getCoeffTableCard");
-        var loader = $("#getCoeffTableLoader");
+        var table = $("#getOrderInfoTable");
+        var card = $("#getOrderInfoTableCard");
+        var loader = $("#getOrderInfoTableLoader");
 
-        var actions = $("#getCoeffTableCard > div.card-header > div > button");
+        var actions = $("#getOrderInfoTableCard > div.card-header > div > button");
 
         function getTableData() {
             return data;
@@ -110,7 +110,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetCoeffServiceName })',
+                url: '@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetOrderInfoServiceName })',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);
@@ -221,7 +221,7 @@
                             <td class="text-center">
                                     <div class="form-check">
                                         <label class="form-check-label">
-                                            <input id="display_user_@(Constants.SUOSGetCoeffServiceName)_${current.user}" class="form-check-input" type="checkbox">
+                                            <input id="display_user_@(Constants.SUOSGetOrderInfoServiceName)_${current.user}" class="form-check-input" type="checkbox">
                                             <span class="form-check-sign"></span>
                                         </label>
                                     </div>
@@ -257,9 +257,9 @@
                 var descendingOrder = anchor.hasClass("desc");
                 var propertyName = anchor.attr("id").replace("sort_by_", "");
 
-                $("#getCoeffTable thead a.sortable i").remove();
-                $("#getCoeffTable thead a.sortable").removeClass("asc");
-                $("#getCoeffTable thead a.sortable").removeClass("desc");
+                $("#getOrderInfoTable thead a.sortable i").remove();
+                $("#getOrderInfoTable thead a.sortable").removeClass("asc");
+                $("#getOrderInfoTable thead a.sortable").removeClass("desc");
 
                 if (!descendingOrder) {
                     anchor.addClass("desc");
