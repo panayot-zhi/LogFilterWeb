@@ -9,7 +9,7 @@
             <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
                 <i class="now-ui-icons loader_gear"></i>
             </button>
-            <div class="dropdown-menu dropdown-menu-right text-right"> @* TODO: Extract service name as a constant *@
+            <div class="dropdown-menu dropdown-menu-right text-right">
                 <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetOrderStatusServiceName })" target="_blank">Get JSON</a>
 
                 <form class="getServiceJsonZip" asp-action="GetServiceJsonZip" target="_blank">
