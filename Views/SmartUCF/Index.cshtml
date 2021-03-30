@@ -67,7 +67,7 @@
                     </p>
                 </a>
             </li>
-            
+
             <li id="headerChartOptions" class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="headerChartOptionsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="now-ui-icons media-2_sound-wave"></i>
@@ -141,33 +141,21 @@
 
 }
 
-@if (Model.SingleDate)
-{
-    <div class="panel-header">
-        <div class="header text-center">
-            <h2 class="title">Server data by Day</h2>
-            <p class="category">You have selected a single date for a monitor period.<br>A historical graphic will not be constructed.</p>
-        </div>
-    </div>
-}
-else
-{
-    @await Html.PartialAsync("_ServersDailyHeaderChart")
-}
+@await Html.PartialAsync("_ServersDailyHeaderChart")
 
 <div class="content">
     <div class="row">
         <div class="col-md-7">
-            
+
             @await Html.PartialAsync("_ListsUsageTableCard")
 
         </div>
 
         <div class="col-lg-5">
-            
-            @await Html.PartialAsync("_ListsUsagePieChartCard")             
-            @await Html.PartialAsync("_ServersUsagePieChartCard")             
-            
+
+            @await Html.PartialAsync("_ListsUsagePieChartCard")
+            @await Html.PartialAsync("_ServersUsagePieChartCard")
+
             @await Html.PartialAsync("_UsersUsageBarChartCard")
         </div>
 
@@ -298,13 +286,13 @@ else
 
                     window.location.reload(true);
                 });
-        }     
-        
+        }
+
         $(document).ready(function() {
             const modelStartDate = "@Model.StartDate.ToString("dd.MM.yyyy")";
             const modelEndDate = "@Model.EndDate.ToString("dd.MM.yyyy")";
             initializeDateRangePicker(modelStartDate, modelEndDate);
-            initializeCurrentServersPicker();            
+            initializeCurrentServersPicker();
 
             var listsPieChart = window.constructListsUsagePieChartCard();
             var serversPieChart = window.constructServersUsagePieChartCard();
@@ -313,7 +301,7 @@ else
             var listsUsageTable = window.constructListsUsageTable();
 
             listsUsageTable.table.on("constructed.table.now-ui",
-                function (e, data) {                                
+                function (e, data) {
                     listsPieChart.updateData(data);
                     serversPieChart.updateData(data);
 
@@ -323,7 +311,7 @@ else
                 });
 
             listsUsageTable.table.on("updated.table.now-ui",
-                function(e, data) {                                  
+                function(e, data) {
                     listsPieChart.updateData(data);
                     serversPieChart.updateData(data);
 
