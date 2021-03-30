@@ -10,7 +10,7 @@
                 <i class="now-ui-icons loader_gear"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right">
-                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSOtpConfig })" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSOtpConfig })" target="_blank">Get JSON</a>
 
                 <a class="dropdown-item text-danger refresh" href="#">Refresh Data</a>
             </div>
@@ -105,7 +105,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSOtpConfig })',
+                url: '@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSOtpConfig })',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);

@@ -10,7 +10,7 @@
                 <i class="now-ui-icons loader_gear"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right">
-                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSDefaultConfig })" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSDefaultConfig })" target="_blank">Get JSON</a>
                 
                 <form class="getSummariesZip" asp-action="GetSummariesZip" target="_blank">
                     <input class="dropdown-item" type="submit" value="Get Summaries Zip" />
@@ -108,7 +108,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSDefaultConfig })',
+                url: '@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSDefaultConfig })',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);

@@ -10,7 +10,7 @@
                 <i class="now-ui-icons loader_gear"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-right text-right">
-                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { config = Constants.SUOSBusterConfig })" target="_blank">Get JSON</a>
+                <a class="dropdown-item" href="@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSBusterConfig })" target="_blank">Get JSON</a>
                 
                 <form class="getSummariesZip" asp-action="GetSummariesZip" target="_blank">
                     <input class="dropdown-item" type="submit" value="Get Summaries Zip" />
@@ -108,7 +108,7 @@
             actions.attr("disabled", "disabled");
 
             $.ajax({
-                url: '@Url.Action("GetSummariesData", "SUOSApi", new {config = Constants.SUOSBusterConfig})',
+                url: '@Url.Action("GetSummariesData", "SUOSApi", new { configName = Constants.SUOSBusterConfig })',
                 success: function (r) {
                     updateMeta(r.meta);
                     updateData(r.results);
@@ -199,7 +199,7 @@
                             <td class="text-center">
                                     <div class="form-check">
                                         <label class="form-check-label">
-                                            <input id="display_filter_${filter.name}" class="form-check-input" type="checkbox">
+                                            <input id="display_filter_@(Constants.SUOSBusterConfig)_${encodeURIComponent(filter.name)}" class="form-check-input" type="checkbox">
                                             <span class="form-check-sign"></span>
                                         </label>
                                     </div>
