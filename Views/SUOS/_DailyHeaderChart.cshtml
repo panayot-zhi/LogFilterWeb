@@ -1,5 +1,5 @@
-﻿<div id="userDailyUsageHeaderChartPanel" class="panel-header panel-header-lg">
-    <div id="userDailyUsageHeaderChartLoader">
+﻿<div id="dailyUsageHeaderChartPanel" class="panel-header panel-header-lg">
+    <div id="dailyUsageHeaderChartLoader">
         <div class="hrc-spinner text-white">
             <div class="bounce1 bg-white"></div>
             <div class="bounce2 bg-white"></div>
@@ -7,7 +7,7 @@
             Loading
         </div>
     </div>
-    <canvas id="userDailyUsageHeaderChart"></canvas>
+    <canvas id="dailyUsageHeaderChart"></canvas>
 </div>
 
 <script>
@@ -18,9 +18,9 @@
 
         var currentlyDisplaying = null;
 
-        var canvas = $("#userDailyUsageHeaderChart");
-        var panel = $("#userDailyUsageHeaderChartPanel");
-        var loader = $("#userDailyUsageHeaderChartLoader");
+        var canvas = $("#dailyUsageHeaderChart");
+        var panel = $("#dailyUsageHeaderChartPanel");
+        var loader = $("#dailyUsageHeaderChartLoader");
 
         // NOTE: External elements
         var title = $("#headerChartTitle");
@@ -70,12 +70,15 @@
             var display = currentlyDisplaying;
             if (display.startsWith("display_filter")) {
 
+                let normalizedId = display.replace("display_filter", "");
+                let configName = normalizedId.split("_")[0];
+                let targetFilter = normalizedId.replace(configName + "_", "");
 
             } else if (display.startsWith("display_user")) {
 
-                var normalizedId = display.replace("display_user_", "");
-                var serviceName = normalizedId.split("_")[0];
-                var targetUser = normalizedId.replace(serviceName + "_", "");
+                let normalizedId = display.replace("display_user_", "");
+                let serviceName = normalizedId.split("_")[0];
+                let targetUser = normalizedId.replace(serviceName + "_", "");
             }
 
             title.html(`${currentlyDisplaying}`);
@@ -90,20 +93,34 @@
             currentlyDisplaying = display;
             if (display.startsWith("display_filter")) {
 
+                let normalizedId = display.replace("display_filter_", "");
+                let configName = normalizedId.split("_")[0];
+                let targetFilter = normalizedId.replace(configName + "_", "");
+
+                $.ajax({
+                    url: '@Url.Action("GetSummariesDataByDay", "SUOSApi")' + `?configName=${configName}&filter=${targetFilter}`,
+                    success: function (r) {
+                        updateData(null, r.results);
+                        updateMeta(r.meta);
+                    }
+                });
 
             } else if (display.startsWith("display_user")) {
 
-                var normalizedId = display.replace("display_user_", "");
-                var serviceName = normalizedId.split("_")[0];
-                var targetUser = normalizedId.replace(serviceName + "_", "");
+                let normalizedId = display.replace("display_user_", "");
+                let serviceName = normalizedId.split("_")[0];
+                let targetUser = normalizedId.replace(serviceName + "_", "");
 
                 $.ajax({
                     url: '@Url.Action("GetUserDataByDay", "SUOSApi")' + `?serviceName=${serviceName}&user=${targetUser}`,
-                    success: function (r) {
+                    success: function(r) {
                         updateData(null, r.results);
-                        updateMeta(r.meta);                    
+                        updateMeta(r.meta);
                     }
                 });
+
+            } else {
+                showErrorNotification('Cannot resolve the display command from the id passed for the daily header chart.');
             }
         }
 
