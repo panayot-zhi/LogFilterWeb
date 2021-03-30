@@ -80,7 +80,8 @@
             <div class=" container-fluid ">
                 @await RenderSectionAsync("footer", required: true)
                 <div class="copyright" id="copyright">
-                    © @DateTime.Now.Year Now UI; <a href="https://github.com/panayot-zhi" target="_blank">Panayot Ivanov</a>.
+                    © @DateTime.Now.Year Now UI; <a href="https://github.com/panayot-zhi" target="_blank">Panayot Ivanov</a>. 
+                    v @Extensions.GetAppVersion()
                 </div>
             </div>
 

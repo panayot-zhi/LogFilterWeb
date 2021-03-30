@@ -1,10 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>564c0b1f-7774-4212-9ca5-a00983e5d701</UserSecretsId>
+    <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
+    <SatelliteResourceLanguages>bg;en</SatelliteResourceLanguages>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <Authors>Panayot Ivanov</Authors>
+    <Version>1.1.7-c05b6c8</Version>
+    <Company>Datacom</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +23,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.1" />
-    <PackageReference Include="NUglify" Version="1.13.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="NUglify" Version="1.13.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,4 +32,7 @@
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
+  <Target AfterTargets="AfterPublish" Name="UpdateVersionPy">
+    <Exec Command="python &quot;$(ProjectDir)Utility\python\version.py&quot; &quot;$(ProjectDir)$(ProjectName).csproj&quot;" />
+  </Target>
 </Project>

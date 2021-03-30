@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,21 @@ namespace LogFilterWeb.Utility
         {
             for (var day = start.Date; day.Date <= end.Date; day = day.AddDays(1))
                 yield return day;
+        }
+
+        private static string _appVersion;
+
+        public static string GetAppVersion()
+        {
+            if (_appVersion != null)
+            {
+                return _appVersion;
+            }
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "1.0.0";
+            _appVersion = informationalVersion;
+            return informationalVersion;
         }
 
         public static T ReadCookie<T>(this ControllerBase controller, string key) where T : new()
