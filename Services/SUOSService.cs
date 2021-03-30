@@ -36,38 +36,11 @@ namespace LogFilterWeb.Services
             var summaryRecords = filesInRangeArray.Select(FilesHelper.ReadSummary);
             if (forSpecificFilter)
             {
-                summaryRecords = summaryRecords.Select(x => new SummaryFile()
+                summaryRecords = summaryRecords.Select(x =>
                 {
-                    Date = x.Date,
-                    MachineName = x.MachineName,
-                    InputFile = x.InputFile,
-                    BeginDateTime = x.BeginDateTime,
-                    BeginProcessTimestamp = x.BeginProcessTimestamp,
-                    CopyOriginal = x.CopyOriginal,
-                    Elapsed = x.Elapsed,
-                    EndDateTime = x.EndDateTime,
-                    EndProcessTimestamp = x.EndProcessTimestamp,
-                    EntriesConstructed = x.EntriesConstructed,
-                    FilesRead = x.FilesRead,
-                    FilesWritten = x.FilesWritten,
-                    FilteredEntries = x.FilteredEntries,
-                    InputFolder = x.InputFolder,
-                    LinesRead = x.LinesRead,
-                    LinesWritten = x.LinesWritten,
-                    LogsRead = x.LogsRead,
-                    NonStandardEntries = x.NonStandardEntries,
-                    OutputFolder = x.OutputFolder,
-                    OverwriteFiles = x.OverwriteFiles,
-                    ParserName = x.ParserName,
-                    Reparse = x.Reparse,
-                    SplitByIdentities = x.SplitByIdentities,
-                    SplitByLogLevels = x.SplitByLogLevels,
-                    SplitByThreads = x.SplitByThreads,
-                    TakeLastFiles = x.TakeLastFiles,
-                    VerboseMode = x.VerboseMode,
-                    
-                    Filters = x.Filters.Where(f => f.Name == filter).ToArray()
-
+                    var newSummary = ObjectCloner.JsonCopy(x);
+                    newSummary.Filters = x.Filters.Where(f => f.Name == filter).ToArray();
+                    return newSummary;
                 });
             }
 
