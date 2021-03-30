@@ -12,7 +12,7 @@ namespace LogFilterWeb.Services
 {
     public class SUOSService
     {
-        public static IEnumerable<SummaryFile> GetSummaryRecords(SUOS cookieData, string config, ref dynamic meta)
+        public static IEnumerable<SummaryFile> GetSummaryRecords(SUOS cookieData, string config, ref dynamic meta, string filter = null)
         {
             meta.begin = DateTime.Now.ToLocalTime();
 
@@ -31,23 +31,62 @@ namespace LogFilterWeb.Services
                 FilesHelper.ToDateTime(x.Directory.Name) <= to.Date
             );
 
+            var forSpecificFilter = !string.IsNullOrEmpty(filter);
             var filesInRangeArray = filesInRange as FileInfo[] ?? filesInRange.ToArray();
-            var summaryRecords = filesInRangeArray.Select(FilesHelper.ReadSummary).ToList();
+            var summaryRecords = filesInRangeArray.Select(FilesHelper.ReadSummary);
+            if (forSpecificFilter)
+            {
+                summaryRecords = summaryRecords.Select(x => new SummaryFile()
+                {
+                    Date = x.Date,
+                    MachineName = x.MachineName,
+                    InputFile = x.InputFile,
+                    BeginDateTime = x.BeginDateTime,
+                    BeginProcessTimestamp = x.BeginProcessTimestamp,
+                    CopyOriginal = x.CopyOriginal,
+                    Elapsed = x.Elapsed,
+                    EndDateTime = x.EndDateTime,
+                    EndProcessTimestamp = x.EndProcessTimestamp,
+                    EntriesConstructed = x.EntriesConstructed,
+                    FilesRead = x.FilesRead,
+                    FilesWritten = x.FilesWritten,
+                    FilteredEntries = x.FilteredEntries,
+                    InputFolder = x.InputFolder,
+                    LinesRead = x.LinesRead,
+                    LinesWritten = x.LinesWritten,
+                    LogsRead = x.LogsRead,
+                    NonStandardEntries = x.NonStandardEntries,
+                    OutputFolder = x.OutputFolder,
+                    OverwriteFiles = x.OverwriteFiles,
+                    ParserName = x.ParserName,
+                    Reparse = x.Reparse,
+                    SplitByIdentities = x.SplitByIdentities,
+                    SplitByLogLevels = x.SplitByLogLevels,
+                    SplitByThreads = x.SplitByThreads,
+                    TakeLastFiles = x.TakeLastFiles,
+                    VerboseMode = x.VerboseMode,
+                    
+                    Filters = x.Filters.Where(f => f.Name == filter).ToArray()
+
+                });
+            }
+
+            var summaryRecordsArray = summaryRecords as SummaryFile[] ?? summaryRecords.ToArray();
             //var summaryAggregate = FilesHelper.Combine(summaryRecords);
             //summaryRecords.Add(summaryAggregate);
 
             meta.from = from;
             meta.fromCache = fromCache;
             meta.config = config;
-            meta.records = summaryRecords.FirstOrDefault()?.Filters.Length;
-            meta.logFiles = summaryRecords.Select(x => x.InputFile);
+            meta.records = summaryRecordsArray.FirstOrDefault()?.Filters.Length;
+            meta.logFiles = summaryRecordsArray.Select(x => x.InputFile);
             meta.summaryFiles = filesInRangeArray.Select(x => x.FullName);
             meta.to = to;
 
             meta.end = DateTime.Now.ToLocalTime();
             meta.elapsed = (meta.end - meta.begin).ToString("c");
 
-            return summaryRecords;
+            return summaryRecordsArray;
         }
 
         public static IEnumerable<UserQueryFile> GetUserQueryData(SUOS cookieData, string serviceName, ref dynamic meta, string user = null)
