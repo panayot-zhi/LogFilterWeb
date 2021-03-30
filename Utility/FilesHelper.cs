@@ -121,18 +121,20 @@ namespace LogFilterWeb.Utility
 
         public static SummaryFile ReadSummary(FileInfo fileInfo)
         {
-            return ReadSummary(fileInfo.FullName);
+            var machineName = GetSUOSMachineName(fileInfo.FullName, out _);
+            var directoryName = fileInfo.Directory.Name;
+
+            var summary = ReadJson<SummaryFile>(fileInfo.FullName);
+
+            summary.MachineName = machineName;
+            summary.Date = ToDateTime(directoryName);
+
+            return summary;
         }
 
         public static SummaryFile ReadSummary(string filePath)
         {
-            var machineName = GetSUOSMachineName(filePath, out _);
-
-            var summary = ReadJson<SummaryFile>(filePath);
-
-            summary.MachineName = machineName;
-
-            return summary;
+            return ReadSummary(new FileInfo(filePath));
         }
 
         public static UserQueryFile ReadUserQueryFiles(FileInfo fileInfo)

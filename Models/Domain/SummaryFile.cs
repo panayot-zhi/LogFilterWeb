@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace LogFilterWeb.Models.Domain
 {
@@ -149,6 +150,12 @@ namespace LogFilterWeb.Models.Domain
         public string ParserName { get; set; }
 
         public string MachineName { get; set; }
+
+        /// <summary>
+        /// Calculated when reading the summary file.
+        /// </summary>
+        [JsonIgnore]
+        public DateTime Date { get; set; }
 
         public void CopyConfiguration(Configuration cfg, string inputFile, string outputFolder)
         {
