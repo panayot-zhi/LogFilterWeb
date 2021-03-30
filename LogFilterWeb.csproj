@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -8,7 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <Authors>Panayot Ivanov</Authors>
-    <Version>1.1.7-c05b6c8</Version>
+    <Version>1.1.8-4e8904f</Version>
     <Company>Datacom</Company>
   </PropertyGroup>
 
