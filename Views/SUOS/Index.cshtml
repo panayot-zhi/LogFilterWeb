@@ -125,6 +125,12 @@
         <div class="col-md-4">
             @await Html.PartialAsync("_GetCoeffTableCard", Model)
         </div>
+        <div class="col-md-4">
+            @await Html.PartialAsync("_GetOrderInfoTableCard", Model)
+        </div>
+        <div class="col-md-4">
+            @await Html.PartialAsync("_GetOrderStatusTableCard", Model)
+        </div>
     </div>
     <div class="row">
         <div class="col-md-5 offset-md-1">
@@ -247,10 +253,14 @@
             var userDailyHeaderChart = window.constructUserDailyUsageHeaderChart();
 
             var getCoeffTable = window.constructGetCoeffTable();
+            var getOrderInfoTable = window.constructGetOrderInfoTable();
+            var getOrderStatusTable = window.constructGetOrderStatusTable();
 
             var defaultConfigTable = window.constructDefaultConfigTable();
             var busterConfigTable = window.constructBusterConfigTable();
 
+            getOrderStatusTable.updateData();
+            getOrderInfoTable.updateData();
             getCoeffTable.updateData();
             getCoeffTable.table.on("constructed.table.now-ui",
                 function (e, data) {
