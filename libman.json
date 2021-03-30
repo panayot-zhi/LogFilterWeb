@@ -40,7 +40,7 @@
       "destination": "wwwroot/lib/moment.js/",
       "files": [
         "moment.js",
-        "moment.min.js",
+        "moment.min.js"
       ]
     },
     {
