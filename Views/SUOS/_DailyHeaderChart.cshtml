@@ -70,18 +70,22 @@
             var display = currentlyDisplaying;
             if (display.startsWith("display_filter")) {
 
-                let normalizedId = display.replace("display_filter", "");
+                let normalizedId = display.replace("display_filter_", "");
                 let configName = normalizedId.split("_")[0];
                 let targetFilter = normalizedId.replace(configName + "_", "");
+
+                title.html(`<small>Displaying filter</small> '${targetFilter}' <small>for configuration</small> ${configName}`);
 
             } else if (display.startsWith("display_user")) {
 
                 let normalizedId = display.replace("display_user_", "");
                 let serviceName = normalizedId.split("_")[0];
                 let targetUser = normalizedId.replace(serviceName + "_", "");
+
+                title.html(`<small>Displaying user</small> '${targetUser}' <small>for service</small> ${serviceName}`);
             }
 
-            title.html(`${currentlyDisplaying}`);
+            
         }
 
         function fetchData(display) {
