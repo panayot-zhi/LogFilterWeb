@@ -12,12 +12,14 @@
             <div class="dropdown-menu dropdown-menu-right text-right"> @* TODO: Extract service name as a constant *@
                 <a class="dropdown-item" href="@Url.Action("GetUsersData", "SUOSApi", new { serviceName = Constants.SUOSGetCoeffServiceName })" target="_blank">Get JSON</a>
 
-                <form id="getCsvZip" asp-action="GetServiceJsonZip" target="_blank">
+                <form class="getServiceJsonZip" asp-action="GetServiceJsonZip" target="_blank">
+                    <input type="hidden" name="serviceName" value="@Constants.SUOSGetCoeffServiceName">
                     <input class="dropdown-item" type="submit" value="Get Service JSON Zip" />
                 </form>
-
-                <form id="getLogsZip" asp-action="GetLogsZip" target="_blank">
-                    <input class="dropdown-item" type="submit" value="Get Logs Zip" />
+                
+                <form class="getUserLogsZip" asp-action="GetUserLogsZip" target="_blank">
+                    <input type="hidden" name="user">
+                    <input class="dropdown-item" type="submit" value="Get User Logs Zip" />
                 </form>
 
                 <a class="dropdown-item text-danger refresh" href="#">Refresh Data</a>
@@ -118,16 +120,16 @@
 
         function updateMeta(metaData) {
 
-            card.find('.getCsvZip input[name="filePaths"]').remove();
-            card.find('.getLogsZip input[name="filePaths"]').remove();
+            card.find('.getServiceJsonZip input[name="filePaths"]').remove();
+            card.find('.getUserLogsZip input[name="filePaths"]').remove();
             card.find('.card-footer .stats .dropup .dropdown-menu a').remove();
 
             for (var i = 0; i < metaData.files.length; i++) {
 
                 var file = metaData.files[i];
 
-                card.find(".getCsvZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
-                card.find(".getLogsZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
+                card.find(".getServiceJsonZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
+                card.find(".getUserLogsZip").append(`<input type="hidden" name="filePaths" value="${file}">`);
 
                 card.find('.card-footer .stats .dropup .dropdown-menu').append(`<a class="dropdown-item" href="javascript:void(0)">${file}</a>`);
             }
@@ -297,6 +299,17 @@
                 if (hiddenElements.length) {
                     hiddenElements.slice(0, 5).removeClass("d-none");
                 }
+            });
+
+        table.on('click',
+            'input[type="checkbox"][id^=display_]',
+            function (e) {
+
+                let normalizedId = this.id.replace("display_user_", "");
+                let serviceName = normalizedId.split("_")[0];
+                let targetUser = normalizedId.replace(serviceName + "_", "");
+
+                card.find('.getUserLogsZip input[type="hidden"][name="user"]').val(targetUser);
             });
 
         return {
