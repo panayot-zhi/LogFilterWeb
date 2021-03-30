@@ -1,32 +1,5 @@
 ﻿/* Panayot Ivanov */
 
-.sortable {
-    /*placeholder*/
-}
-
-.refresh {
-    /*placeholder*/
-}
-
-.show-more {
-    
-}
-
-.getCsvZip {
-    /*placeholder*/
-}
-
-.getSummariesZip {
-    /*placeholder*/
-}
-
-.getFilteredLogsZip {
-}
-
-.getLogsZip {
-    /*placeholder*/
-}
-
 /* NowUI Overrides */
 .navbar .navbar-brand small {
     text-transform: none;
