@@ -9,6 +9,9 @@ namespace LogFilterWeb.Utility
 {
     public static class Constants
     {
+        //public const string Root = "X:\\";
+        public const string Root = "\\\\192.168.10.18\\Logs\\";
+
         /// <summary>
         /// yyyy-MM-dd
         /// </summary>
@@ -23,12 +26,12 @@ namespace LogFilterWeb.Utility
         /// <summary>
         /// X:\\Processed\\SUOS\\
         /// </summary>
-        public const string SUOSRoot = "X:\\Processed\\SUOS\\";
+        public const string SUOSRoot = Root + "Processed\\SUOS\\";
 
         /// <summary>
         /// X:\\Logs\\SUOS\\
         /// </summary>
-        public const string SUOSLogsRoot = "X:\\Logs\\SUOS\\";
+        public const string SUOSLogsRoot = Root + "Logs\\SUOS\\";
 
         /// <summary>
         /// "6", "7"
@@ -84,12 +87,12 @@ namespace LogFilterWeb.Utility
         /// <summary>
         /// X:\\Processed\\SmartUCF\\
         /// </summary>
-        public const string SmartUCFRoot = "X:\\Processed\\SmartUCF\\";
+        public const string SmartUCFRoot = Root + "Processed\\SmartUCF\\";
 
         /// <summary>
         /// X:\\Logs\\SmartUCF\\
         /// </summary>
-        public const string SmartUCFLogsRoot = "X:\\Logs\\SmartUCF\\";
+        public const string SmartUCFLogsRoot = Root + "Logs\\SmartUCF\\";
 
         /// <summary>
         /// "06", "07", "08", "09"
