@@ -46,7 +46,11 @@ namespace LogFilterWeb.Models.Domain
         /// <summary>
         /// The filter value to be matched against the value of the log entry property.
         /// </summary>
-        [JsonIgnore]    // TODO: Figure out why the pattern isn't loaded and include again
-        public Regex Value { get; set; }
+        public Filter Value { get; set; }
+    }
+
+    public class Filter
+    {
+        public string Pattern { get; set; }
     }
 }
