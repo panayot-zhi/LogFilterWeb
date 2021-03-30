@@ -118,12 +118,7 @@
 
 }
 
-<div class="panel-header">
-    <div class="header text-center">
-        <h2 class="title">SUOS</h2>
-        <p class="category">Use this place here to construct a dashboard from all the available dashboards for the system.</p>
-    </div>
-</div>
+@await Html.PartialAsync("_UserDailyHeaderChart")
 
 <div class="content">
     <div class="row">
@@ -249,17 +244,30 @@
             initializeDateRangePicker(modelStartDate, modelEndDate);
             initializeCurrentServersPicker();           
 
+            var userDailyHeaderChart = window.constructUserDailyUsageHeaderChart();
+
             var getCoeffTable = window.constructGetCoeffTable();
 
             var defaultConfigTable = window.constructDefaultConfigTable();
             var busterConfigTable = window.constructBusterConfigTable();
 
             getCoeffTable.updateData();
+            getCoeffTable.table.on("constructed.table.now-ui",
+                function (e, data) {
+                    $("#getCoeffTable").find('tr td input[type="checkbox"]').first().click();
+                });
 
             defaultConfigTable.updateData();
             busterConfigTable.updateData();
 
-
+            $(".card").on('click',
+                'input[type="checkbox"][id^=display_]',
+                function (e) {
+                    $('input[type="checkbox"][id^=display_]').prop("checked", false);
+                    $(this).prop("checked", true);
+                    userDailyHeaderChart.updateData(this.id);
+                });
         });
+
     </script>
 }
