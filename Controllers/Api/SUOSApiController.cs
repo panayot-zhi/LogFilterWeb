@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -15,12 +16,12 @@ namespace LogFilterWeb.Controllers.Api
     public class SUOSApiController : ControllerBase
     {
         [HttpGet]
-        public dynamic GetSummariesData(string config = Constants.SUOSDefaultConfig)
+        public dynamic GetSummariesData(string configName = Constants.SUOSDefaultConfig)
         {
             dynamic meta = new ExpandoObject();
 
             var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
-            var data = SUOSService.GetSummaryRecords(cookieData, config, ref meta);
+            var data = SUOSService.GetSummaryRecords(cookieData, configName, ref meta);
             var query = data.AsParallel();
 
             return new
@@ -36,6 +37,72 @@ namespace LogFilterWeb.Controllers.Api
                         };
 
                     }).OrderBy(x => x.Machine)
+            };
+        }
+
+        [HttpGet]
+        public dynamic GetSummariesDataByDay(string configName, string filter)
+        {
+            if (string.IsNullOrEmpty(configName))
+            {
+                throw new ArgumentNullException(nameof(configName));
+            }
+
+            if (string.IsNullOrEmpty(filter))
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            dynamic meta = new ExpandoObject();
+
+            var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
+            var data = SUOSService.GetSummaryRecords(cookieData, configName, ref meta, filter);
+            var query = data.AsParallel();
+
+            return new
+            {
+                Meta = meta,
+                Results = query.GroupBy(keySelector: x => x.MachineName,
+                    resultSelector: (machine, groupByMachine) =>
+                    {
+                        var groupByMachineArray = groupByMachine as SummaryFile[] ?? groupByMachine.ToArray();
+
+                        var result = new List<dynamic>();
+                        foreach (var day in Extensions.EachDay(cookieData.StartDate, cookieData.EndDate))
+                        {
+                            var dailyFilterRecord = groupByMachineArray
+                                .SingleOrDefault(x => x.Date == day)?
+                                .Filters
+                                .SingleOrDefault(x => x.Name == filter);
+                            
+                            if (dailyFilterRecord != null)
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    Name = dailyFilterRecord.Name,
+                                    Type = dailyFilterRecord.Type,
+                                    Value = dailyFilterRecord.Value,
+                                    Count = dailyFilterRecord.Count
+                                });
+                            }
+                            else
+                            {
+                                result.Add(new
+                                {
+                                    Date = day,
+                                    Name = filter,
+                                    Count = 0
+                                });
+                            }
+                        }
+
+                        return new
+                        {
+                            Name = machine,
+                            Records = result
+                        };
+                    })
             };
         }
 
@@ -69,6 +136,16 @@ namespace LogFilterWeb.Controllers.Api
         [HttpGet]
         public dynamic GetUserDataByDay(string serviceName, string user)
         {
+            if (string.IsNullOrEmpty(serviceName))
+            {
+                throw new ArgumentNullException(nameof(serviceName));
+            }
+
+            if (string.IsNullOrEmpty(user))
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
             dynamic meta = new ExpandoObject();
 
             var cookieData = this.ReadCookie<SUOS>(SUOS.CookieName);
@@ -95,9 +172,9 @@ namespace LogFilterWeb.Controllers.Api
                                 result.Add(new
                                 {
                                     Date = day,
-                                    dailyUserRecord.User,
-                                    dailyUserRecord.Queries,
-                                    dailyUserRecord.Count
+                                    User = dailyUserRecord.User,
+                                    Queries = dailyUserRecord.Queries,
+                                    Count = dailyUserRecord.Count
                                 });
                             }
                             else
