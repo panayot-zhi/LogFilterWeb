@@ -4,10 +4,10 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using LogFilterWeb.Models.Domain;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
@@ -50,12 +50,23 @@ namespace LogFilterWeb.Utility
             var result = directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
                 .OrderByDescending(x => x.FullName).ToList(); // always order by descending FullName
 
+            //var result = NetworkGetFiles(directoryInfo, searchPattern);
+
             // refresh the record data in cache
             Cache.Set(key, result, TimeSpan.FromHours(1));
 
             fromCache = false;
 
             return result;
+        }
+
+        private static List<FileInfo> NetworkGetFiles(DirectoryInfo directoryInfo, string searchPattern)
+        {
+            using (new NetworkConnection(Constants.Root, new NetworkCredential(Constants.NetworkUser, Constants.NetworkPass)))
+            {
+                return directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
+                    .OrderByDescending(x => x.FullName).ToList(); // always order by descending FullName
+            }
         }
 
         public static StopwatchFile ReadStopWatchFile(FileInfo fileInfo)

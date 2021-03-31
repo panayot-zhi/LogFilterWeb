@@ -8,7 +8,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <Authors>Panayot Ivanov</Authors>
-    <Version>1.1.8-4e8904f</Version>
+    <Version>1.1.20-5501993</Version>
     <Company>Datacom</Company>
   </PropertyGroup>
 

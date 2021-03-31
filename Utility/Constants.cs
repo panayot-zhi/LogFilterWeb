@@ -11,6 +11,8 @@ namespace LogFilterWeb.Utility
     {
         //public const string Root = "X:\\";
         public const string Root = "\\\\192.168.10.18\\Logs\\";
+        //public const string NetworkUser = "RemoteAdmin";
+        //public const string NetworkPass = "***";
 
         /// <summary>
         /// yyyy-MM-dd

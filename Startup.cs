@@ -1,3 +1,5 @@
+using System.IO;
+using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using LogFilterWeb.Utility;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.FileProviders;
 
 namespace LogFilterWeb
 {
@@ -60,6 +63,15 @@ namespace LogFilterWeb
             app.UseStaticFiles();
             app.UseRouting();
             app.UseSwagger();
+
+            /*var sourceCredentials = new NetworkCredential(Constants.NetworkUser, Constants.NetworkPass);
+            using (new NetworkConnection(Constants.Root, sourceCredentials))
+            {
+                app.UseStaticFiles(new StaticFileOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(Path.Combine(Constants.Root))
+                });
+            }*/
 
             app.UseSwaggerUI(c =>
             {
