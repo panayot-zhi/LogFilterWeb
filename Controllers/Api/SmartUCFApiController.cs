@@ -54,7 +54,7 @@ namespace LogFilterWeb.Controllers.Api
                         {
                             Id = list,
                             TotalRecords = byListRecords.Length,
-                            ListName = Constants.SmartUCFListDisplayName[list],
+                            ListName = Extensions.GetSmartUCFListDisplayName(list),
                             TotalRowsRetrieved = byListRecords.Sum(x => x.NumberOfRows),
                             MaxRowsRetrieved = byListRecords.Max(x => x.NumberOfRows),
                             AvgRowsRetrieved = byListRecords.Average(x => x.NumberOfRows),
@@ -143,7 +143,7 @@ namespace LogFilterWeb.Controllers.Api
                         return new
                         {
                             Id = list,
-                            Name = Constants.SmartUCFListDisplayName[list],
+                            Name = Extensions.GetSmartUCFListDisplayName(list),
 
                             TotalRowsRetrieved = groupByListArray.Sum(x => x.NumberOfRows),
                             MaxRowsRetrieved = groupByListArray.Max(x => x.NumberOfRows),
@@ -173,7 +173,7 @@ namespace LogFilterWeb.Controllers.Api
             var query = data.AsParallel();
 
             meta.listName = listName;
-            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
+            meta.listDisplayName = Extensions.GetSmartUCFListDisplayName(listName);
 
             query = query.Where(x => x.ListName == listName);
             // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));
@@ -249,7 +249,7 @@ namespace LogFilterWeb.Controllers.Api
             var query = data.AsParallel();
 
             meta.listName = listName;
-            meta.listDisplayName = Constants.SmartUCFListDisplayName[listName];
+            meta.listDisplayName = Extensions.GetSmartUCFListDisplayName(listName);
 
             query = query.Where(x => x.ListName == listName);
             // query = query.Where(x => cookieData.MonitoredServers.Contains(x.MachineName));

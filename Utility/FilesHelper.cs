@@ -60,14 +60,14 @@ namespace LogFilterWeb.Utility
             return result;
         }
 
-        private static List<FileInfo> NetworkGetFiles(DirectoryInfo directoryInfo, string searchPattern)
+        /*private static List<FileInfo> NetworkGetFiles(DirectoryInfo directoryInfo, string searchPattern)
         {
             using (new NetworkConnection(Constants.Root, new NetworkCredential(Constants.NetworkUser, Constants.NetworkPass)))
             {
                 return directoryInfo.GetFiles(searchPattern, SearchOption.AllDirectories)
                     .OrderByDescending(x => x.FullName).ToList(); // always order by descending FullName
             }
-        }
+        }*/
 
         public static StopwatchFile ReadStopWatchFile(FileInfo fileInfo)
         {

@@ -40,6 +40,16 @@ namespace LogFilterWeb.Utility
             return informationalVersion;
         }
 
+        public static string GetSmartUCFListDisplayName(string listName)
+        {
+            if (Constants.SmartUCFListDisplayName.ContainsKey(listName))
+            {
+                return Constants.SmartUCFListDisplayName[listName];
+            }
+
+            return listName;
+        }
+
         public static T ReadCookie<T>(this ControllerBase controller, string key) where T : new()
         {
             var cookieData = controller.HttpContext.Request.Cookies[key];
