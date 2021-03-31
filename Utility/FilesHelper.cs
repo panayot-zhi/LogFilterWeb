@@ -17,7 +17,7 @@ namespace LogFilterWeb.Utility
     public static class FilesHelper
     {
         private static bool ThrowIfNotDate = true;
-        public static bool UseCache = true;
+        public static bool UseCache = false;
 
         private static readonly MemoryCache Cache = new MemoryCache(new MemoryCacheOptions()
         {
