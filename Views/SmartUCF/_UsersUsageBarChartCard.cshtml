@@ -2,7 +2,7 @@
     <div class="card-header">
         <h5 class="card-category">General Analysis</h5>
         <h4 class="card-title">User Statistics</h4>
-        <p class="category">Displays the the top 10 users that have the highest amount of <b>total retrieved rows</b> for the chosen list in the monitored period.</p>
+        <p class="category">Displays the the top 10 users that have the highest amount of the selected display property for the chosen list in the monitored period.</p>
         
         <div class="dropdown">
             <button type="button" class="btn btn-round btn-outline-default dropdown-toggle btn-icon no-caret" data-toggle="dropdown">
@@ -42,7 +42,8 @@
     </div>
     <div class="card-footer">
         <div class="stats">
-            <i class="now-ui-icons ui-2_time-alarm"></i> IMPLEMENT ME
+            <i class="now-ui-icons ui-2_time-alarm"></i>
+            <span class="stats-info"></span>
         </div>
     </div>
 </div>
@@ -59,6 +60,7 @@
         var canvas = $("#usersUsageBarChart");
         var panel = $("#usersUsageBarChartPanel");
         var loader = $("#usersUsageBarChartLoader");
+        var card = $("#usersUsageBarChartCard");
 
         var options = $("#usersUsageBarChartOptions");
 
@@ -93,8 +95,10 @@
             }
         }
 
-        function updateMeta(meta) {
-            // TODO
+        function updateMeta(metaData) {
+            card.find('.card-footer > .stats > .stats-info').html(`Displaying user's <b>${displayProperty}</b> for list <b>${metaData.listDisplayName}</b>
+                            from ${moment(metaData.from).format('yyyy-MM-DD')}
+                            to ${moment(metaData.to).format('yyyy-MM-DD')}.`);
         }
 
         function fetchData(forList) {
@@ -194,7 +198,7 @@
                             yAxes: [{
                                 ticks: {
                                     callback: function(value, index, values) {
-                                        return nFormatter(value);
+                                        return nFormatter(value, 2);
                                     }
                                 },
                                 gridLines: {
@@ -229,7 +233,31 @@
             panel.trigger('constructed.barChart.now-ui', [listName, displayProperty, chartData]);
         }
 
+        // EVENTS ->
+
+        options.on('click',
+            "a.dropdown-item",
+            function (e) {
+                e.preventDefault();
+
+                var lastRetrievedList = listName;
+                listName = null;
+
+                if ($(this).hasClass('refresh')) {
+                    updateData(lastRetrievedList);
+                    return;
+                }
+
+                displayProperty = this.dataset.display;
+                updateData(lastRetrievedList);
+
+            });
+
         return {
+
+            listName: listName,
+            displayProperty: displayProperty,
+
             updateData: updateData
         }
     }
